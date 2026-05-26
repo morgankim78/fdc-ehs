@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FDC EHS">
+<meta name="theme-color" content="#1A3A5C">
+<title>SL Dallas Team — FDC EHS Checklist</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --blue:#1A3A5C;--blue-mid:#2E5F8A;--blue-light:#D6E4F0;--blue-xlight:#EAF3FB;
+  --orange:#854F0B;--orange-light:#FAEEDA;
+  --red:#791F1F;--red-light:#FCEBEB;
+  --green:#27500A;--green-light:#EAF3DE;
+  --purple:#3C3489;--purple-light:#EEEDFE;
+  --gray:#F2F2F2;--gray-mid:#CCCCCC;--gray-dark:#444441;
+  --white:#FFFFFF;--text:#1A1A1A;--text-muted:#666666;
+  --radius:10px;--radius-sm:6px;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bot:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#F0F4F8;color:var(--text);min-height:100vh;overscroll-behavior:none}
+/* ── Top Bar ── */
+.topbar{background:var(--blue);padding:calc(12px + var(--safe-top)) 14px 0;position:sticky;top:0;z-index:100}
+.topbar-inner{padding-bottom:10px}
+.tb-row1{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.app-name{font-size:14px;font-weight:600;color:#B5D4F4;flex:1;letter-spacing:.3px}
+.ver-tag{font-size:10px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.08);padding:2px 6px;border-radius:10px}
+.tab-bar{display:flex;gap:2px}
+.tab{flex:1;padding:8px 4px;font-size:11px;font-weight:500;color:rgba(255,255,255,.55);text-align:center;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none}
+.tab.active{color:#fff;border-bottom-color:#5BA3E0}
+/* ── State Selector ── */
+.state-bar{background:var(--blue-mid);padding:8px 14px;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none}
+.state-bar::-webkit-scrollbar{display:none}
+.sp{font-size:11px;font-weight:500;padding:4px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.65);background:transparent;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.sp.active{background:#fff;color:var(--blue);border-color:#fff}
+/* ── Search ── */
+.search-wrap{background:var(--blue);padding:8px 14px 12px}
+.search-row{display:flex;gap:8px;align-items:center}
+.search-input{flex:1;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:var(--radius);padding:9px 12px;color:#fff;font-size:14px;outline:none}
+.search-input::placeholder{color:rgba(255,255,255,.4)}
+.search-input:focus{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.5)}
+.mic-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;font-size:18px}
+.mic-btn:hover{background:rgba(255,255,255,.22)}
+.mic-btn.listening{background:#E24B4A;border-color:#E24B4A;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* ── Freq Tabs ── */
+.freq-bar{background:#fff;display:flex;gap:0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid #E8EDF2}
+.freq-bar::-webkit-scrollbar{display:none}
+.fb{padding:10px 12px;font-size:12px;font-weight:500;color:var(--text-muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:all .15s}
+.fb.active{color:var(--blue);border-bottom-color:var(--blue)}
+/* ── Stats ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:#fff;border-bottom:1px solid #E8EDF2}
+.stat{padding:10px 6px;text-align:center;border-right:1px solid #E8EDF2}
+.stat:last-child{border-right:none}
+.stat-n{font-size:18px;font-weight:600;color:var(--text)}
+.stat-l{font-size:10px;color:var(--text-muted);margin-top:2px}
+/* ── Content ── */
+.content{padding-bottom:calc(80px + var(--safe-bot))}
+/* ── Category Group ── */
+.cat-group{margin:0;border-bottom:1px solid #E8EDF2;background:#fff}
+.cat-head{display:flex;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;background:#F7FAFD;border-bottom:1px solid #E8EDF2}
+.cat-part{font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;flex-shrink:0}
+.pa{background:var(--blue-light);color:var(--blue)}
+.pb{background:var(--orange-light);color:var(--orange)}
+.cat-name{font-size:13px;font-weight:600;color:var(--text);flex:1}
+.risk-b{font-size:10px;font-weight:600;padding:2px 7px;border-radius:6px;flex-shrink:0}
+.r-c{background:var(--red-light);color:var(--red)}
+.r-h{background:var(--orange-light);color:var(--orange)}
+.r-m{background:var(--green-light);color:var(--green)}
+.r-n{background:var(--purple-light);color:var(--purple)}
+.cat-cnt{font-size:11px;color:var(--text-muted);flex-shrink:0}
+.chev{font-size:16px;color:var(--text-muted);transition:transform .2s;flex-shrink:0}
+.chev.open{transform:rotate(180deg)}
+.sec-group{display:none}
+.sec-head{display:flex;align-items:center;gap:6px;padding:9px 14px 9px 22px;cursor:pointer;border-bottom:1px solid #EEF2F7;background:#FBFCFE}
+.sec-name{font-size:12px;color:var(--text-muted);flex:1}
+.sec-cnt{font-size:11px;color:var(--text-muted)}
+.items-body{display:none}
+/* ── Item Card ── */
+.item-card{display:flex;align-items:flex-start;gap:12px;padding:11px 14px 11px 22px;border-bottom:1px solid #EEF2F7;cursor:pointer;transition:background .1s;background:#fff}
+.item-card:hover,.item-card:active{background:#F7FAFD}
+.item-card.state-hi{background:#FDFAF5}
+.chk-circle{width:20px;height:20px;border-radius:50%;border:2px solid #C8D6E5;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .2s;cursor:pointer}
+.chk-circle.done{background:var(--blue);border-color:var(--blue)}
+.chk-circle.done::after{content:"✓";font-size:11px;color:#fff;font-weight:700}
+.item-body{flex:1;min-width:0}
+.item-text{font-size:13px;color:var(--text);line-height:1.5}
+.item-text.done{text-decoration:line-through;color:var(--text-muted)}
+.item-meta{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;align-items:center}
+.ftag{font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px}
+.f-daily{background:#FCEBEB;color:#791F1F}
+.f-weekly{background:#FAEEDA;color:#633806}
+.f-monthly{background:#E6F1FB;color:#0C447C}
+.f-quarterly{background:#EEEDFE;color:#3C3489}
+.f-biannual{background:#E1F5EE;color:#085041}
+.f-annual{background:#EAF3DE;color:#27500A}
+.f-event{background:#F1EFE8;color:#444441}
+.stag{font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;background:#FAECE7;color:#993C1D}
+.stdtag{font-size:10px;color:var(--text-muted)}
+.hi{background:#FFF3CD;border-radius:2px;color:#633806}
+/* ── Bottom Nav ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #E8EDF2;display:flex;padding:6px 0 calc(6px + var(--safe-bot));z-index:100}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0;background:none;border:none;color:var(--text-muted);font-size:10px;font-weight:500;transition:color .15s}
+.bnav-btn.active{color:var(--blue)}
+.bnav-icon{font-size:20px}
+/* ── Progress Bar ── */
+.prog-wrap{background:#fff;padding:10px 14px;border-bottom:1px solid #E8EDF2}
+.prog-header{display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:5px}
+.prog-track{height:5px;background:#E8EDF2;border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--blue);border-radius:3px;transition:width .4s}
+/* ── Voice Panel ── */
+.voice-panel{background:#fff;padding:16px 14px;border-bottom:1px solid #E8EDF2;display:none}
+.voice-status{font-size:12px;color:var(--text-muted);text-align:center;margin-bottom:10px}
+.voice-result{font-size:15px;font-weight:500;color:var(--text);text-align:center;min-height:22px;margin-bottom:10px}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.qb{padding:9px 10px;border-radius:var(--radius-sm);border:1px solid #E8EDF2;background:#F7FAFD;color:var(--text);font-size:12px;cursor:pointer;text-align:left;font-weight:500}
+.qb:active{background:#EAF3FB}
+/* ── Schedule Tab ── */
+.schedule-content{padding:14px}
+.sched-section{background:#fff;border-radius:var(--radius);margin-bottom:10px;overflow:hidden;border:1px solid #E8EDF2}
+.sched-head{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#F7FAFD;border-bottom:1px solid #E8EDF2;cursor:pointer}
+.sched-title{font-size:13px;font-weight:600;color:var(--text);flex:1}
+.sched-cnt{font-size:11px;color:var(--text-muted)}
+.sched-item{padding:9px 14px;border-bottom:1px solid #EEF2F7;font-size:12px;color:var(--text);line-height:1.4}
+.sched-item:last-child{border-bottom:none}
+.sched-cat{font-size:10px;color:var(--text-muted);margin-top:2px}
+/* ── Cost Tab ── */
+.cost-content{padding:14px}
+.cost-card{background:#fff;border-radius:var(--radius);border:1px solid #E8EDF2;padding:14px;margin-bottom:10px}
+.cost-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:5px;font-weight:500}
+.field input[type=number],.field select{width:100%;padding:9px 12px;border-radius:var(--radius-sm);border:1px solid #C8D6E5;font-size:14px;color:var(--text);background:#fff;outline:none}
+.field input:focus,.field select:focus{border-color:var(--blue)}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.slider-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #EEF2F7}
+.slider-row:last-child{border-bottom:none}
+.slider-info{flex:1;min-width:0}
+.slider-label{font-size:12px;font-weight:500;color:var(--text)}
+.slider-sub{font-size:10px;color:var(--text-muted);margin-top:2px}
+.slider-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;min-width:90px}
+.slider-val{font-size:11px;font-weight:600;color:var(--blue);text-align:right}
+.slider-right input[type=range]{width:80px}
+.result-box{background:var(--blue);border-radius:var(--radius);padding:16px;margin-bottom:10px}
+.result-total-label{font-size:12px;color:#B5D4F4;margin-bottom:4px}
+.result-total{font-size:28px;font-weight:700;color:#fff;margin-bottom:8px}
+.result-persqft{font-size:12px;color:#B5D4F4}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.result-cell{background:rgba(255,255,255,.12);border-radius:var(--radius-sm);padding:9px 10px}
+.result-cell-label{font-size:10px;color:rgba(255,255,255,.6);margin-bottom:3px}
+.result-cell-val{font-size:14px;font-weight:600;color:#fff}
+.breakdown-item{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid #EEF2F7;gap:8px}
+.breakdown-item:last-child{border-bottom:none}
+.bd-label{font-size:12px;color:var(--text);flex:1}
+.bd-src{font-size:10px;color:var(--text-muted);margin-top:2px}
+.bd-amt{font-size:12px;font-weight:600;color:var(--text);flex-shrink:0}
+.bd-total{color:var(--blue);font-weight:700;font-size:13px}
+.source-badge{font-size:9px;font-weight:600;padding:1px 5px;border-radius:4px;background:#E6F1FB;color:#0C447C;margin-left:4px}
+.ca-badge{font-size:9px;font-weight:600;padding:1px 5px;border-radius:4px;background:#FCEBEB;color:#791F1F}
+.note-box{background:#F7FAFD;border-radius:var(--radius-sm);border-left:3px solid var(--blue-mid);padding:10px 12px;font-size:11px;color:var(--text-muted);line-height:1.6;margin-top:10px}
+.reset-btn{width:100%;padding:11px;border-radius:var(--radius);border:1px solid #C8D6E5;background:#fff;color:var(--text-muted);font-size:13px;font-weight:500;cursor:pointer;margin-top:8px}
+.empty-state{padding:48px 20px;text-align:center;color:var(--text-muted)}
+.empty-icon{font-size:40px;display:block;margin-bottom:12px}
+.empty-text{font-size:14px}
+/* ── About Tab ── */
+.about-content{padding:14px}
+.about-card{background:#fff;border-radius:var(--radius);border:1px solid #E8EDF2;padding:16px;margin-bottom:10px}
+.about-card h3{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px}
+.about-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #EEF2F7;font-size:12px}
+.about-row:last-child{border-bottom:none}
+.about-key{color:var(--text-muted)}
+.about-val{color:var(--text);font-weight:500}
+.state-info-row{padding:8px 0;border-bottom:1px solid #EEF2F7;font-size:12px}
+.state-info-row:last-child{border-bottom:none}
+.state-code{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-light);padding:2px 7px;border-radius:6px;margin-right:6px}
+.state-osha{font-size:10px;color:var(--text-muted);margin-top:3px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="tb-row1">
+      <span class="app-name">SL Dallas Team — FDC EHS</span>
+      <span class="ver-tag">v01</span>
+    </div>
+    <div class="tab-bar">
+      <button class="tab active" onclick="switchTab('checklist',this)">체크리스트</button>
+      <button class="tab" onclick="switchTab('schedule',this)">점검 일정</button>
+      <button class="tab" onclick="switchTab('cost',this)">비용 계산기</button>
+      <button class="tab" onclick="switchTab('about',this)">정보</button>
+    </div>
+  </div>
+</div>
+
+<!-- Checklist Tab -->
+<div id="tab-checklist">
+  <div class="state-bar" id="state-bar">
+    <button class="sp active" onclick="setSt('ALL',this)">전체</button>
+    <button class="sp" onclick="setSt('TX',this)">TX</button>
+    <button class="sp" onclick="setSt('PA',this)">PA</button>
+    <button class="sp" onclick="setSt('FL',this)">FL</button>
+    <button class="sp" onclick="setSt('CA',this)">CA</button>
+    <button class="sp" onclick="setSt('IL',this)">IL</button>
+    <button class="sp" onclick="setSt('GA',this)">GA</button>
+    <button class="sp" onclick="setSt('NJ',this)">NJ</button>
+    <button class="sp" onclick="setSt('WA',this)">WA</button>
+  </div>
+  <div class="search-wrap">
+    <div class="search-row">
+      <input class="search-input" id="search-input" placeholder="검색... 소방수, forklift, 스프링클러, UPS..." oninput="onSearch(this.value)">
+      <button class="mic-btn" id="mic-btn" onclick="toggleVoice()" aria-label="음성 검색">🎙</button>
+    </div>
+  </div>
+  <div class="voice-panel" id="voice-panel">
+    <div class="voice-status" id="voice-status">마이크를 누르고 말씀하세요</div>
+    <div class="voice-result" id="voice-result"></div>
+    <div class="quick-grid">
+      <button class="qb" onclick="doVoiceSearch('소방수 점검')">🎙 소방수 점검</button>
+      <button class="qb" onclick="doVoiceSearch('스프링클러 압력')">🎙 스프링클러 압력</button>
+      <button class="qb" onclick="doVoiceSearch('지게차 점검')">🎙 지게차 점검</button>
+      <button class="qb" onclick="doVoiceSearch('비상구')">🎙 비상구</button>
+      <button class="qb" onclick="doVoiceSearch('UPS 배터리')">🎙 UPS 배터리</button>
+      <button class="qb" onclick="doVoiceSearch('Arc Flash')">🎙 Arc Flash</button>
+      <button class="qb" onclick="doVoiceSearch('CA 전용')">🎙 CA 전용</button>
+      <button class="qb" onclick="doVoiceSearch('LOTO')">🎙 LOTO</button>
+    </div>
+  </div>
+  <div class="freq-bar" id="freq-bar">
+    <button class="fb active" onclick="setFreq('ALL',this)">전체</button>
+    <button class="fb" onclick="setFreq('daily',this)">일간</button>
+    <button class="fb" onclick="setFreq('weekly',this)">주간</button>
+    <button class="fb" onclick="setFreq('monthly',this)">월간</button>
+    <button class="fb" onclick="setFreq('quarterly',this)">분기</button>
+    <button class="fb" onclick="setFreq('biannual',this)">반기</button>
+    <button class="fb" onclick="setFreq('annual',this)">연간</button>
+    <button class="fb" onclick="setFreq('event',this)">이벤트</button>
+  </div>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-n" id="s-total">0</div><div class="stat-l">전체</div></div>
+    <div class="stat"><div class="stat-n" id="s-checked" style="color:#0F6E56">0</div><div class="stat-l">완료</div></div>
+    <div class="stat"><div class="stat-n" id="s-critical" style="color:#A32D2D">0</div><div class="stat-l">Critical</div></div>
+    <div class="stat"><div class="stat-n" id="s-state" style="color:#993C1D">0</div><div class="stat-l">주 특화</div></div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-header"><span>점검 진행률</span><span id="prog-pct">0%</span></div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="content" id="checklist-body"></div>
+</div>
+
+<!-- Schedule Tab -->
+<div id="tab-schedule" style="display:none">
+  <div class="schedule-content" id="schedule-content"></div>
+</div>
+
+<!-- Cost Tab -->
+<div id="tab-cost" style="display:none">
+  <div class="cost-content">
+    <div class="result-box">
+      <div class="result-total-label">예상 원상복구 비용 (참고용)</div>
+      <div class="result-total" id="cost-total">$0</div>
+      <div class="result-persqft" id="cost-persqft">— /sqft</div>
+      <div class="result-grid">
+        <div class="result-cell"><div class="result-cell-label">내부 철거·복구</div><div class="result-cell-val" id="cost-demo">$0</div></div>
+        <div class="result-cell"><div class="result-cell-label">위험물·환경</div><div class="result-cell-val" id="cost-haz">$0</div></div>
+        <div class="result-cell"><div class="result-cell-label">전문 조사·검사</div><div class="result-cell-val" id="cost-prof">$0</div></div>
+        <div class="result-cell"><div class="result-cell-label">건축연도 추가</div><div class="result-cell-val" id="cost-build">$0</div></div>
+      </div>
+    </div>
+    <div class="cost-card">
+      <div class="cost-title">창고 기본 정보</div>
+      <div class="field-grid">
+        <div class="field"><label>창고 면적 (sq ft)</label><input type="number" id="c-area" value="50000" min="1000" step="1000" oninput="calcCost()"></div>
+        <div class="field"><label>창고 주(State)</label><select id="c-state" onchange="calcCost()">
+          <option value="TX">Texas (TX)</option><option value="PA">Pennsylvania (PA)</option>
+          <option value="FL">Florida (FL)</option><option value="CA">California (CA)</option>
+          <option value="IL">Illinois (IL)</option><option value="GA">Georgia (GA)</option>
+          <option value="NJ">New Jersey (NJ)</option><option value="WA">Washington (WA)</option>
+        </select></div>
+        <div class="field"><label>건축 연도</label><select id="c-year" onchange="calcCost()">
+          <option value="new">2000년 이후</option><option value="mid">1980~1999년</option>
+          <option value="old">1980년 이전 (석면·납 위험)</option>
+        </select></div>
+        <div class="field"><label>임차 기간</label><select id="c-lease" onchange="calcCost()">
+          <option value="short">1~3년 단기</option><option value="mid" selected>3~7년 중기</option>
+          <option value="long">7년 이상 장기</option>
+        </select></div>
+      </div>
+    </div>
+    <div class="cost-card">
+      <div class="cost-title">내부 철거·시설 복구</div>
+      <div class="slider-row">
+        <div class="slider-info">
+          <div class="slider-label">일반 내부 철거 단가 <span class="source-badge">Hometown Demolition 2024</span></div>
+          <div class="slider-sub">$2~7/sqft</div>
+        </div>
+        <div class="slider-right">
+          <span class="slider-val" id="sv-demo">$4/sqft</span>
+          <input type="range" min="2" max="7" value="4" step="0.5" id="sr-demo" oninput="updSl('sr-demo','sv-demo','rate');calcCost()">
+        </div>
+      </div>
+      <div class="slider-row">
+        <div class="slider-info">
+          <div class="slider-label">바닥 에폭시·도장 제거 면적 비율</div>
+          <div class="slider-sub">현장 견적 필수 — 전체 면적 대비</div>
+        </div>
+        <div class="slider-right">
+          <span class="slider-val" id="sv-epoxy">0%</span>
+          <input type="range" min="0" max="100" value="0" step="10" id="sr-epoxy" oninput="updSl('sr-epoxy','sv-epoxy','pct');calcCost()">
+        </div>
+      </div>
+      <div class="slider-row">
+        <div class="slider-info">
+          <div class="slider-label">랙 앵커 구멍 수</div>
+          <div class="slider-sub">현장 견적 필수</div>
+        </div>
+        <div class="slider-right">
+          <span class="slider-val" id="sv-anchor">0개</span>
+          <input type="range" min="0" max="2000" value="0" step="50" id="sr-anchor" oninput="updSl('sr-anchor','sv-anchor','cnt','개');calcCost()">
+        </div>
+      </div>
+      <div class="slider-row">
+        <div class="slider-info">
+          <div class="slider-label">임시 배선 철거 (LF)</div>
+          <div class="slider-sub">현장 견적 필수</div>
+        </div>
+        <div class="slider-right">
+          <span class="slider-val" id="sv-wiring">0 LF</span>
+          <input type="range" min="0" max="5000" value="0" step="100" id="sr-wiring" oninput="updSl('sr-wiring','sv-wiring','lf');calcCost()">
+        </div>
+      </div>
+    </div>
+    <div class="cost-card">
+      <div class="cost-title">위험물·환경 복구</div>
+      <div class="slider-row">
+        <div class="slider-info">
+          <div class="slider-label">석면 제거 <span class="source-badge">Angi/HomeAdvisor 2025~26</span></div>
+          <div class="slider-sub">$5~20/sqft (미해당 = 0)</div>
+        </div>
+        <div class="slider-right">
+          <span class="slider-val" id="sv-asb">미해당</span>
+          <input type="range" min="0" max="20" value="0" step="1" id="sr-asb" oninput="updSl('sr-asb','sv-asb','asb');calcCost()">
+        </div>
+      </div>
+      <div class="slider-row">
+        <div class="slider-info">
+          <div class="slider-label">위험 폐기물 처리 (드럼)</div>
+          <div class="slider-sub">현장 견적 필수</div>
+        </div>
+        <div class="slider-right">
+          <span class="slider-val" id="sv-waste">0드럼</span>
+          <input type="range" min="0" max="200" value="0" step="5" id="sr-waste" oninput="updSl('sr-waste','sv-waste','cnt','드럼');calcCost()">
+        </div>
+      </div>
+      <div class="slider-row">
+        <div class="slider-info">
+          <div class="slider-label">냉매 회수 (유닛)</div>
+          <div class="slider-sub">현장 견적 필수</div>
+        </div>
+        <div class="slider-right">
+          <span class="slider-val" id="sv-ref">0유닛</span>
+          <input type="range" min="0" max="50" value="0" step="1" id="sr-ref" oninput="updSl('sr-ref','sv-ref','cnt','유닛');calcCost()">
+        </div>
+      </div>
+      <div class="slider-row" id="ca-soil-row" style="display:none">
+        <div class="slider-info">
+          <div class="slider-label">토양 오염 정화 <span class="ca-badge">★ CA Only</span> <span class="source-badge">Substrata LA 2025</span></div>
+          <div class="slider-sub">$15~45/sqft</div>
+        </div>
+        <div class="slider-right">
+          <span class="slider-val" id="sv-soil">미해당</span>
+          <input type="range" min="0" max="45" value="0" step="5" id="sr-soil" oninput="updSl('sr-soil','sv-soil','asb');calcCost()">
+        </div>
+      </div>
+    </div>
+    <div class="cost-card">
+      <div class="cost-title">전문 조사·검사</div>
+      <div class="slider-row">
+        <div class="slider-info">
+          <div class="slider-label">Phase I ESA <span class="source-badge">Geo Forward 2024</span></div>
+          <div class="slider-sub">$1,900~6,500/건</div>
+        </div>
+        <div class="slider-right">
+          <span class="slider-val" id="sv-esa">미해당</span>
+          <input type="range" min="0" max="6500" value="0" step="500" id="sr-esa" oninput="updSl('sr-esa','sv-esa','fixed');calcCost()">
+        </div>
+      </div>
+      <div class="slider-row">
+        <div class="slider-info">
+          <div class="slider-label">열화상·전기 점검</div>
+          <div class="slider-sub">현장 견적 필수</div>
+        </div>
+        <div class="slider-right">
+          <span class="slider-val" id="sv-elec">미해당</span>
+          <input type="range" min="0" max="50000" value="0" step="1000" id="sr-elec" oninput="updSl('sr-elec','sv-elec','fixed');calcCost()">
+        </div>
+      </div>
+    </div>
+    <div class="cost-card" id="breakdown-card" style="display:none">
+      <div class="cost-title">비용 내역</div>
+      <div id="breakdown-body"></div>
+      <div class="note-box">
+        Conesco 실사례 참고값: $3.5~6/sqft →
+        <span id="conesco-range">-</span><br>
+        ※ 이 계산기는 사전 예산 계획용 참고치입니다. 퇴거 2년 전 전문 업체 현장 견적을 반드시 취득하십시오.
+      </div>
+    </div>
+    <button class="reset-btn" onclick="resetCost()">↺ 초기화</button>
+  </div>
+</div>
+
+<!-- About Tab -->
+<div id="tab-about" style="display:none">
+  <div class="about-content">
+    <div class="about-card">
+      <h3>앱 정보</h3>
+      <div class="about-row"><span class="about-key">앱 이름</span><span class="about-val">SL Dallas Team FDC EHS</span></div>
+      <div class="about-row"><span class="about-key">버전</span><span class="about-val">v01</span></div>
+      <div class="about-row"><span class="about-key">적용 기준</span><span class="about-val">OSHA 29 CFR 1910</span></div>
+      <div class="about-row"><span class="about-key">카테고리</span><span class="about-val">15개 (PART A 7 + PART B 8)</span></div>
+      <div class="about-row"><span class="about-key">총 점검 항목</span><span class="about-val">247개</span></div>
+      <div class="about-row"><span class="about-key">대상 창고</span><span class="about-val">TX · PA · FL · CA · IL · GA · NJ · WA</span></div>
+    </div>
+    <div class="about-card">
+      <h3>주별 규정 체계</h3>
+      <div id="state-info-list"></div>
+    </div>
+    <div class="about-card">
+      <h3>비용 계산기 출처</h3>
+      <div class="about-row"><span class="about-key">내부 철거</span><span class="about-val">$2~7/sqft</span></div>
+      <div class="about-row"><span class="about-key">출처</span><span class="about-val">Hometown Demolition 2024</span></div>
+      <div class="about-row"><span class="about-key">전체 철거</span><span class="about-val">$4~8/sqft</span></div>
+      <div class="about-row"><span class="about-key">출처</span><span class="about-val">CRE Loans 2024</span></div>
+      <div class="about-row"><span class="about-key">석면 제거</span><span class="about-val">$5~20/sqft</span></div>
+      <div class="about-row"><span class="about-key">출처</span><span class="about-val">Angi/HomeAdvisor 2025~26</span></div>
+      <div class="about-row"><span class="about-key">CA 토양 정화</span><span class="about-val">$15~45/sqft</span></div>
+      <div class="about-row"><span class="about-key">출처</span><span class="about-val">Substrata LA 2025</span></div>
+      <div class="about-row"><span class="about-key">Phase I ESA</span><span class="about-val">$1,900~6,500/건</span></div>
+      <div class="about-row"><span class="about-key">출처</span><span class="about-val">Geo Forward 2024</span></div>
+      <div class="about-row"><span class="about-key">전체 Decom.</span><span class="about-val">$3.5~6/sqft</span></div>
+      <div class="about-row"><span class="about-key">출처</span><span class="about-val">Conesco 실사례 2025</span></div>
+    </div>
+    <div class="about-card">
+      <h3>홈 화면 추가 방법</h3>
+      <div class="about-row" style="display:block;padding:8px 0;font-size:12px;color:var(--text-muted);line-height:1.7">
+        <b>iPhone (Safari)</b><br>
+        하단 공유 버튼 → "홈 화면에 추가" 탭<br><br>
+        <b>Android (Chrome)</b><br>
+        우상단 메뉴 → "홈 화면에 추가" 또는 "앱 설치"
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <button class="bnav-btn active" id="bnav-checklist" onclick="switchTab('checklist',null,this)">
+    <span class="bnav-icon">✓</span>체크리스트
+  </button>
+  <button class="bnav-btn" id="bnav-schedule" onclick="switchTab('schedule',null,this)">
+    <span class="bnav-icon">📅</span>일정
+  </button>
+  <button class="bnav-btn" id="bnav-cost" onclick="switchTab('cost',null,this)">
+    <span class="bnav-icon">💰</span>비용
+  </button>
+  <button class="bnav-btn" id="bnav-about" onclick="switchTab('about',null,this)">
+    <span class="bnav-icon">ℹ</span>정보
+  </button>
+</div>
+
+<script>
+const RAW={"meta":{"title":"FDC Warehouse EHS & Decommissioning Inspection Checklist","org":"SL Dallas Team","version":"01","standard":"OSHA 29 CFR 1910","states":["TX","PA","FL","CA","IL","GA","NJ","WA"],"generated":"2025-05-23","parts":[{"id":"A","name":"EHS 운영 점검","en":"EHS Operations"},{"id":"B","name":"Decommissioning 사전 점검","en":"Decommissioning Pre-Check"}]},"state_regulations":[{"code":"TX","name":"Texas","osha_plan":"Federal OSHA","notes":"TCEQ 환경 규정 | 폭염·허리케인 집중 관리","weather_risk":["heat","hurricane"]},{"code":"PA","name":"Pennsylvania","osha_plan":"Federal OSHA","notes":"PA DEP | 동절기 결빙·적설 집중 관리","weather_risk":["freeze","snow"]},{"code":"FL","name":"Florida","osha_plan":"Federal OSHA","notes":"FDEP | 허리케인 시즌(6~11월) 집중 관리","weather_risk":["heat","hurricane"]},{"code":"CA","name":"California","osha_plan":"Cal/OSHA","notes":"Prop 65 | CARB | DTSC | 지진 대비 | AB 2043","weather_risk":["earthquake","heat"],"stricter":true},{"code":"IL","name":"Illinois","osha_plan":"Federal OSHA + HB2987","notes":"토네이도 대피 계획·BARA 피난처 의무 | IEPA","weather_risk":["tornado","heat"]},{"code":"GA","name":"Georgia","osha_plan":"Federal OSHA","notes":"GA EPD | 여름철 고온·폭풍 대비","weather_risk":["heat","storm"]},{"code":"NJ","name":"New Jersey","osha_plan":"Federal OSHA + PEOSH","notes":"NJ DEP 강화 | Right-to-Know | 동절기·해안","weather_risk":["freeze","hurricane"]},{"code":"WA","name":"Washington","osha_plan":"WISHA State Plan","notes":"L&I/DOSH | APP 의무 | HB 1762 창고쿼터법(2024)","weather_risk":["earthquake","flood"],"stricter":true}],"categories":[{"id":"I","part":"A","name":"시설","en":"Facility","risk":"Medium","keywords":["facility","시설","건물","바닥","통로","랙","하역장","조명","도어"],"sections":[{"id":"I-1","name":"건물 외관 및 구조","en":"Building Exterior & Structure","keywords":["건물","외관","구조","균열","벽","지붕"],"items":[{"id":"I-1-1","text":"외벽·구조물에 균열(0.3mm↑)·변형·손상이 없는가?","importance":"상","frequency":"quarterly","standard":"OSHA 29 CFR 1910.22","states":[]},{"id":"I-1-2","text":"지붕 패널 및 패스너의 이완·부식이 없는가?","importance":"상","frequency":"quarterly","standard":"","states":[]},{"id":"I-1-3","text":"외부 배수로 및 우수 처리 시설이 막히지 않았는가?","importance":"중","frequency":"quarterly","standard":"","states":[]},{"id":"I-1-4","text":"외부 보안 조명이 정상 작동하는가? (하역장·비상구 포함)","importance":"중","frequency":"weekly","standard":"","states":[]},{"id":"I-1-5","text":"출입 통제 펜스 및 게이트가 정상 잠금 상태인가?","importance":"중","frequency":"weekly","standard":"","states":[]},{"id":"I-1-6","text":"[★ CA Only] 내진 설계 기준 (CBC) 충족 여부를 확인했는가?","importance":"상","frequency":"annual","standard":"CBC Seismic","states":["CA"],"state_type":"CA_only"}]},{"id":"I-2","name":"바닥 및 통로","en":"Floor & Aisle","keywords":["바닥","통로","aisle","floor","라인","도색","미끄럼"],"items":[{"id":"I-2-1","text":"지게차 통로 폭이 OSHA 기준을 충족하는가? (양방향 10ft / 단방향 8ft)","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1910.22","states":[]},{"id":"I-2-2","text":"보행자 전용 통로와 장비 통로가 명확히 구분되어 있는가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.22","states":[]},{"id":"I-2-3","text":"바닥 라인 도색 (노란선/빨간선)이 선명하게 유지되는가?","importance":"중","frequency":"monthly","standard":"","states":[]},{"id":"I-2-4","text":"바닥 균열·파손·미끄럼 위험 요소(오일·물기)가 없는가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.22","states":[]},{"id":"I-2-5","text":"통로 내 장애물 (적재물·장비·전선)이 방치되지 않았는가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.22","states":[]},{"id":"I-2-6","text":"배수구 커버가 손상 없이 제자리에 있는가?","importance":"중","frequency":"monthly","standard":"","states":[]},{"id":"I-2-7","text":"[⚠ PA/NJ] 동절기 — 출입구·하역장 주변 결빙 제거 조치가 이루어졌는가?","importance":"상","frequency":"event","standard":"","states":["PA","NJ"],"state_type":"weather"}]},{"id":"I-3","name":"출입구·도어·하역장","en":"Doors & Loading Dock","keywords":["도어","door","하역장","dock","비상구","exit","loading"],"items":[{"id":"I-3-1","text":"비상구 도어가 내부에서 즉시 열리며 잠금장치가 없는가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.36","states":[]},{"id":"I-3-2","text":"비상구 앞 3ft (91cm) 이내에 적재물이 없는가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.36","states":[]},{"id":"I-3-3","text":"Overhead Door 안전 센서 및 자동 역회전 기능이 작동하는가?","importance":"상","frequency":"monthly","standard":"","states":[]},{"id":"I-3-4","text":"방화문 자동 닫힘 기능 및 래치가 정상 작동하는가?","importance":"상","frequency":"monthly","standard":"NFPA 80","states":[]},{"id":"I-3-5","text":"Dock Leveler가 정상 작동하며 립 플레이트 손상이 없는가?","importance":"상","frequency":"weekly","standard":"","states":[]},{"id":"I-3-6","text":"입고 차량에 Wheel Chock가 적용되었는가?","importance":"상","frequency":"event","standard":"OSHA 29 CFR 1910.178","states":[]},{"id":"I-3-7","text":"[★ CA Only] 디젤 차량 공회전 5분 이상 발생하지 않는가? (CARB)","importance":"상","frequency":"daily","standard":"CARB","states":["CA"],"state_type":"CA_only"}]},{"id":"I-4","name":"창고 랙 시스템","en":"Racking System","keywords":["랙","rack","선반","앵커","upright","beam"],"items":[{"id":"I-4-1","text":"수직재(Upright)에 3/8인치 이상 변형·손상이 없는가?","importance":"상","frequency":"monthly","standard":"RMI","states":[]},{"id":"I-4-2","text":"수평재(Beam)의 처짐이 경간의 1/180 이내인가?","importance":"상","frequency":"monthly","standard":"RMI","states":[]},{"id":"I-4-3","text":"각 랙 베이에 최대 적재 하중 표시(Placard)가 부착되어 있는가?","importance":"상","frequency":"monthly","standard":"OSHA 권고","states":[]},{"id":"I-4-4","text":"베이스 플레이트 앵커볼트가 견고히 체결되어 있는가?","importance":"상","frequency":"biannual","standard":"","states":[]},{"id":"I-4-5","text":"랙 보호대 (Column Guard)가 설치되어 있으며 손상이 없는가?","importance":"중","frequency":"monthly","standard":"","states":[]},{"id":"I-4-6","text":"지게차 충돌 흔적이 있는 랙은 태그아웃 처리되었는가?","importance":"상","frequency":"event","standard":"RMI","states":[]},{"id":"I-4-7","text":"[★ CA Only] 앵커볼트 내진 등급이 해당 Seismic Zone에 적합한가?","importance":"상","frequency":"annual","standard":"ASCE 7","states":["CA"],"state_type":"CA_only"}]},{"id":"I-5","name":"조명 및 표지판","en":"Lighting & Signage","keywords":["조명","lighting","표지판","sign","라벨","label"],"items":[{"id":"I-5-1","text":"작업구역 조도가 최소 10 fc 이상 유지되는가?","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1910.303 / IES","states":[]},{"id":"I-5-2","text":"통로 및 하역장 조도가 최소 5 fc 이상인가?","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1910.303","states":[]},{"id":"I-5-3","text":"비상 조명이 1 fc 이상이며 90분 점등 유지되는가?","importance":"상","frequency":"monthly","standard":"NFPA 101","states":[]},{"id":"I-5-4","text":"모든 안전 표지판이 OSHA 규격 색상·기호로 표시되어 있는가?","importance":"상","frequency":"quarterly","standard":"OSHA 29 CFR 1910.145","states":[]},{"id":"I-5-5","text":"비상구·소화기·AED 위치 표지가 선명하며 가려지지 않았는가?","importance":"상","frequency":"weekly","standard":"","states":[]},{"id":"I-5-6","text":"[★ CA Only] Prop 65 경고 표지가 해당 구역에 부착되어 있는가?","importance":"상","frequency":"quarterly","standard":"CA Prop 65","states":["CA"],"state_type":"CA_only"}]}]},{"id":"II","part":"A","name":"유틸리티","en":"Utility","risk":"Medium","keywords":["utility","유틸리티","hvac","공조","배관","가스","보일러","냉동"],"sections":[{"id":"II-1","name":"HVAC / 공조 시스템","en":"HVAC","keywords":["hvac","공조","환기","필터","냉방","난방","ventilation"],"items":[{"id":"II-1-1","text":"HVAC 필터 교체 주기가 준수되고 있는가? (최근 교체일 확인)","importance":"상","frequency":"monthly","standard":"ASHRAE 62.1","states":[]},{"id":"II-1-2","text":"창고 환기량이 최소 기준 (0.06 CFM/sq ft) 이상인가?","importance":"상","frequency":"annual","standard":"OSHA 29 CFR 1910.94","states":[]},{"id":"II-1-3","text":"작업 구역 온도가 권장 범위 (60~76°F) 내에서 유지되는가?","importance":"중","frequency":"daily","standard":"","states":[]},{"id":"II-1-4","text":"[★ CA Only] 실내 기온 95°F 초과 시 냉방·휴식 조치 절차가 수립되어 있는가?","importance":"상","frequency":"daily","standard":"AB 2043","states":["CA"],"state_type":"CA_only"},{"id":"II-1-5","text":"공기 흡입구 주변에 장애물·오염원이 없는가?","importance":"중","frequency":"monthly","standard":"","states":[]},{"id":"II-1-6","text":"HVAC 유닛 정기 점검 기록이 유지되고 있는가?","importance":"중","frequency":"annual","standard":"","states":[]}]},{"id":"II-2","name":"배관·급배수","en":"Plumbing & Water Supply","keywords":["배관","급수","배수","plumbing","비상샤워","eyewash","세안"],"items":[{"id":"II-2-1","text":"비상 샤워·세안 설비가 위험물 구역 10초 이내 거리에 설치되어 있는가?","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1910.151 / ANSI Z358.1","states":[]},{"id":"II-2-2","text":"비상 샤워·세안 설비 주 1회 수류 작동 확인이 기록되어 있는가?","importance":"상","frequency":"weekly","standard":"ANSI Z358.1","states":[]},{"id":"II-2-3","text":"비상 샤워 수온이 60~100°F 범위를 유지하는가?","importance":"상","frequency":"monthly","standard":"ANSI Z358.1","states":[]},{"id":"II-2-4","text":"급수 배관에 누수 또는 부식이 없는가?","importance":"중","frequency":"quarterly","standard":"","states":[]},{"id":"II-2-5","text":"바닥 배수구가 막히지 않고 정상 배수되는가?","importance":"중","frequency":"monthly","standard":"","states":[]},{"id":"II-2-6","text":"[⚠ PA/NJ/WA] 동절기 외부 배관 동파 방지 조치가 이루어졌는가?","importance":"상","frequency":"event","standard":"","states":["PA","NJ","WA"],"state_type":"weather"}]},{"id":"II-3","name":"압축공기·가스 시스템","en":"Compressed Air & Gas","keywords":["압축공기","가스","gas","compressor","실린더","cylinder","프로판"],"items":[{"id":"II-3-1","text":"청소 목적 압축공기 사용 압력이 30 PSI 이하로 제한되는가?","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1910.242","states":[]},{"id":"II-3-2","text":"Safety Relief Valve가 MAWP 이하로 설정되어 정상 작동하는가?","importance":"상","frequency":"biannual","standard":"ASME","states":[]},{"id":"II-3-3","text":"가스 감지기가 설치되어 있으며 정상 작동하는가? (LEL 10~25% 경보)","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1910.110","states":[]},{"id":"II-3-4","text":"가스 차단 밸브 위치가 표시되어 있으며 즉시 접근 가능한가?","importance":"상","frequency":"monthly","standard":"","states":[]},{"id":"II-3-5","text":"프로판 실린더가 직립·고정되어 열원으로부터 20ft 이상 이격되는가?","importance":"상","frequency":"weekly","standard":"OSHA 29 CFR 1910.110","states":[]},{"id":"II-3-6","text":"[★ CA Only] 가스 시스템 정기 검사 기록이 보관되어 있는가?","importance":"중","frequency":"annual","standard":"Cal/OSHA","states":["CA"],"state_type":"CA_only"}]},{"id":"II-4","name":"냉동·냉장·보일러","en":"Refrigeration & Boiler","keywords":["냉동","냉장","보일러","boiler","refrigeration","냉매","refrigerant"],"items":[{"id":"II-4-1","text":"냉매 누출 감지기가 설치되어 있으며 정상 작동하는가?","importance":"상","frequency":"biannual","standard":"EPA Section 608","states":[]},{"id":"II-4-2","text":"냉동·냉장 구역 온도가 기준 범위 내에서 유지되는가?","importance":"상","frequency":"monthly","standard":"","states":[]},{"id":"II-4-3","text":"보일러 정기 검사 (연 1~2회) 기록이 보관되어 있는가?","importance":"상","frequency":"annual","standard":"ASME BPV Code","states":[]},{"id":"II-4-4","text":"보일러 실 CO 감지기가 설치되어 정상 작동하는가? (35 ppm 경보)","importance":"상","frequency":"monthly","standard":"OSHA PEL 50 ppm","states":[]},{"id":"II-4-5","text":"압력 방출 밸브 및 배출 라인 상태가 양호한가?","importance":"상","frequency":"biannual","standard":"ASME","states":[]},{"id":"II-4-6","text":"[★ CA Only] CARB HFC 냉매 전환 계획이 수립되어 있는가?","importance":"중","frequency":"annual","standard":"CARB HFC","states":["CA"],"state_type":"CA_only"}]}]},{"id":"III","part":"A","name":"소방/안전","en":"Fire & Safety","risk":"Critical","keywords":["소방","fire","스프링클러","sprinkler","소화기","extinguisher","비상구","exit","화재","alarm"],"sections":[{"id":"III-1","name":"스프링클러 시스템","en":"Sprinkler System","keywords":["스프링클러","sprinkler","헤드","수압","pressure","nfpa"],"items":[{"id":"III-1-1","text":"스프링클러 헤드 주변 18인치 이내에 적재물이 없는가?","importance":"상","frequency":"weekly","standard":"NFPA 25 / OSHA 29 CFR 1910.159","states":[]},{"id":"III-1-2","text":"스프링클러 헤드에 손상·부식·도장·이물질이 없는가?","importance":"상","frequency":"weekly","standard":"NFPA 25","states":[]},{"id":"III-1-3","text":"제어 밸브가 OPEN 상태로 잠금·태그 처리되어 있는가?","importance":"상","frequency":"weekly","standard":"NFPA 25","states":[]},{"id":"III-1-4","text":"시스템 수압이 최소 기준 (7 PSI / 고적재 25 PSI) 이상인가?","importance":"상","frequency":"quarterly","standard":"NFPA 13","states":[]},{"id":"III-1-5","text":"분기 1회 기능 점검 및 연 1회 종합 점검 기록이 보관되어 있는가?","importance":"상","frequency":"quarterly","standard":"NFPA 25","states":[]},{"id":"III-1-6","text":"[★ CA Only] 적재 높이 12ft 초과 구역에 In-Rack 스프링클러가 설치되어 있는가?","importance":"상","frequency":"annual","standard":"Cal Fire","states":["CA"],"state_type":"CA_only"},{"id":"III-1-7","text":"[⚠ PA] 동절기 드라이 파이프 시스템 질소 압력이 정상 유지되는가?","importance":"상","frequency":"event","standard":"NFPA 25","states":["PA"],"state_type":"weather"}]},{"id":"III-2","name":"소화기","en":"Fire Extinguisher","keywords":["소화기","extinguisher","소화","ABC","CO2","fire"],"items":[{"id":"III-2-1","text":"소화기가 NFPA 10 기준 거리 이내에 배치되어 있는가?","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1910.157 / NFPA 10","states":[]},{"id":"III-2-2","text":"소화기 종류가 구역별 화재 등급에 적합한가? (ABC/CO2/K급)","importance":"상","frequency":"monthly","standard":"NFPA 10","states":[]},{"id":"III-2-3","text":"압력 게이지가 정상 범위 (녹색)를 지시하는가?","importance":"상","frequency":"monthly","standard":"NFPA 10","states":[]},{"id":"III-2-4","text":"안전핀 및 봉인 스티커가 이상 없이 부착되어 있는가?","importance":"상","frequency":"monthly","standard":"NFPA 10","states":[]},{"id":"III-2-5","text":"연 1회 정기 점검 태그가 부착되어 있으며 유효한가?","importance":"상","frequency":"annual","standard":"NFPA 10","states":[]},{"id":"III-2-6","text":"[★ CA Only] 소화기 배치 도면이 현장에 비치되어 있는가?","importance":"중","frequency":"annual","standard":"Cal Fire","states":["CA"],"state_type":"CA_only"}]},{"id":"III-3","name":"소방수 공급 시스템","en":"Fire Water Supply","keywords":["소방수","fire water","소화전","hydrant","수압","압력","FDC","pressure","GPM","PSI"],"items":[{"id":"III-3-1","text":"소화전 주변 15ft 이내에 주차·적재물이 없는가?","importance":"상","frequency":"weekly","standard":"NFPA 13","states":[]},{"id":"III-3-2","text":"스탠드파이프 잔류 압력이 100 PSI 이상 유지되는가?","importance":"상","frequency":"quarterly","standard":"NFPA 14","states":[]},{"id":"III-3-3","text":"소화전 최소 유량이 250 GPM 이상 확보되는가?","importance":"상","frequency":"annual","standard":"NFPA 13","states":[]},{"id":"III-3-4","text":"FDC 주변 3ft 이내에 장애물이 없으며 캡 손상이 없는가?","importance":"상","frequency":"monthly","standard":"NFPA 13","states":[]},{"id":"III-3-5","text":"소방 펌프 주간 자동 기동 시험이 실시되고 기록되는가?","importance":"상","frequency":"weekly","standard":"NFPA 25","states":[]},{"id":"III-3-6","text":"[★ CA Only] 소방 용수 공급 계산서가 현장에 보관되어 있는가?","importance":"중","frequency":"annual","standard":"Cal Fire","states":["CA"],"state_type":"CA_only"},{"id":"III-3-7","text":"[⚠ PA/NJ] 동절기 소화전 및 FDC 결빙 방지 조치가 이루어졌는가?","importance":"상","frequency":"event","standard":"","states":["PA","NJ"],"state_type":"weather"}]},{"id":"III-4","name":"화재 경보 시스템","en":"Fire Alarm System","keywords":["경보","alarm","감지기","detector","facp","연기","smoke"],"items":[{"id":"III-4-1","text":"화재 경보 패널 (FACP)에 이상 표시등·오류 코드가 없는가?","importance":"상","frequency":"weekly","standard":"NFPA 72","states":[]},{"id":"III-4-2","text":"경보 발령 시 HVAC 자동 차단 연동 기능이 작동하는가?","importance":"상","frequency":"annual","standard":"NFPA 72","states":[]},{"id":"III-4-3","text":"경보음 및 스트로보 라이트가 창고 전 구역에서 인지 가능한가?","importance":"상","frequency":"annual","standard":"NFPA 72","states":[]},{"id":"III-4-4","text":"연기 감지기 반기 1회 기능 시험 기록이 보관되어 있는가?","importance":"상","frequency":"biannual","standard":"NFPA 72","states":[]},{"id":"III-4-5","text":"비상 연락망 (911 + 사내)이 최신화되어 게시되어 있는가?","importance":"상","frequency":"quarterly","standard":"","states":[]},{"id":"III-4-6","text":"[★ CA Only] Central Station 모니터링 서비스에 연결되어 있는가?","importance":"상","frequency":"annual","standard":"Cal Fire","states":["CA"],"state_type":"CA_only"},{"id":"III-4-7","text":"[⚠ TX/FL] 허리케인 시즌 전 경보 시스템 전체 점검이 완료되었는가?","importance":"상","frequency":"event","standard":"","states":["TX","FL"],"state_type":"weather"}]},{"id":"III-5","name":"비상구·피난","en":"Emergency Exit & Evacuation","keywords":["비상구","exit","피난","evacuation","피난경로","대피"],"items":[{"id":"III-5-1","text":"작업자 수 대비 비상구 수가 NFPA 101 기준을 충족하는가?","importance":"상","frequency":"annual","standard":"OSHA 29 CFR 1910.36 / NFPA 101","states":[]},{"id":"III-5-2","text":"비상구 도어가 내부에서 즉시 열리며 잠금장치가 없는가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.36","states":[]},{"id":"III-5-3","text":"피난 경로 폭 28인치 이상이 확보되며 장애물이 없는가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.36","states":[]},{"id":"III-5-4","text":"EXIT 사인이 비상 전원으로 90분 이상 점등 유지되는가?","importance":"상","frequency":"monthly","standard":"NFPA 101","states":[]},{"id":"III-5-5","text":"피난 계획도가 현재 위치 표시와 함께 각 구역에 게시되어 있는가?","importance":"상","frequency":"annual","standard":"OSHA 29 CFR 1910.38","states":[]},{"id":"III-5-6","text":"연 1회 이상 피난 훈련 실시 기록이 보관되어 있는가?","importance":"상","frequency":"annual","standard":"OSHA 29 CFR 1910.38","states":[]},{"id":"III-5-7","text":"[★ CA Only] 피난 훈련이 연 2회 이상 실시되었는가?","importance":"상","frequency":"biannual","standard":"Cal/OSHA","states":["CA"],"state_type":"CA_only"},{"id":"III-5-8","text":"[★ IL Only] 토네이도 대피 계획 및 BARA 피난처 위치가 EAP에 포함되어 있는가?","importance":"상","frequency":"annual","standard":"HB2987","states":["IL"],"state_type":"state_specific"}]},{"id":"III-6","name":"화기 통제·가연성 물질","en":"Hot Work & Flammable Storage","keywords":["화기","hot work","가연성","flammable","인화성","용접","welding"],"items":[{"id":"III-6-1","text":"화기 작업 전 Hot Work Permit이 발행되고 있는가?","importance":"상","frequency":"event","standard":"NFPA 51B","states":[]},{"id":"III-6-2","text":"화기 작업 구역 30ft 이내 가연성 물질이 제거·차폐되었는가?","importance":"상","frequency":"event","standard":"NFPA 51B","states":[]},{"id":"III-6-3","text":"작업 종료 후 60분 이상 Fire Watch가 배치되는가?","importance":"상","frequency":"event","standard":"NFPA 51B","states":[]},{"id":"III-6-4","text":"인화성 액체 보관량이 NFPA 30 기준 이내인가?","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1910.106 / NFPA 30","states":[]},{"id":"III-6-5","text":"FM/UL 승인 안전 캐비닛이 사용되며 자동 닫힘 기능이 작동하는가?","importance":"상","frequency":"monthly","standard":"NFPA 30","states":[]},{"id":"III-6-6","text":"[★ CA Only] 인화성 액체 보관 허가 (Permit)가 유효하며 현장에 비치되어 있는가?","importance":"상","frequency":"annual","standard":"Cal Fire","states":["CA"],"state_type":"CA_only"}]}]},{"id":"IV","part":"A","name":"위험물","en":"Hazardous Materials","risk":"High","keywords":["위험물","hazmat","화학물질","chemical","SDS","유출","spill","폐기물","waste"],"sections":[{"id":"IV-1","name":"화학물질·SDS 관리","en":"Chemical & SDS Management","keywords":["화학물질","chemical","SDS","GHS","라벨","label","격납"],"items":[{"id":"IV-1-1","text":"상호 반응성 화학물질이 격리 보관되고 있는가?","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1910.106 / NFPA 400","states":[]},{"id":"IV-1-2","text":"모든 화학물질 용기에 GHS 규격 라벨이 부착되어 있는가?","importance":"상","frequency":"weekly","standard":"OSHA HazCom 2012","states":[]},{"id":"IV-1-3","text":"2차 격납 설비 용량이 최대 용기의 110% 이상인가?","importance":"상","frequency":"monthly","standard":"EPA / SPCC","states":[]},{"id":"IV-1-4","text":"사업장 내 모든 화학물질 SDS가 구비·즉시 접근 가능한가?","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1910.1200","states":[]},{"id":"IV-1-5","text":"SDS가 최신 버전으로 관리되고 있는가? (3개월 이내 업데이트)","importance":"상","frequency":"quarterly","standard":"OSHA 29 CFR 1910.1200","states":[]},{"id":"IV-1-6","text":"[★ CA Only] Prop 65 경고 표지가 해당 구역에 부착되어 있는가?","importance":"상","frequency":"quarterly","standard":"CA Prop 65","states":["CA"],"state_type":"CA_only"},{"id":"IV-1-7","text":"[★ CA Only] HMBP가 CERS에 등록·최신화되어 있는가?","importance":"상","frequency":"annual","standard":"CA HMBP","states":["CA"],"state_type":"CA_only"}]},{"id":"IV-2","name":"유출 대응·위험 폐기물","en":"Spill Response & Hazardous Waste","keywords":["유출","spill","폐기물","waste","RCRA","manifest","격납"],"items":[{"id":"IV-2-1","text":"Spill Kit이 화학물질 보관 구역 10ft 이내에 비치되어 있는가?","importance":"상","frequency":"monthly","standard":"OSHA","states":[]},{"id":"IV-2-2","text":"Spill Kit 구성품이 완비되어 있으며 유효 기간이 유효한가?","importance":"상","frequency":"monthly","standard":"","states":[]},{"id":"IV-2-3","text":"유출 대응 절차가 수립되어 현장에 게시되어 있는가?","importance":"상","frequency":"annual","standard":"EPA CERCLA","states":[]},{"id":"IV-2-4","text":"위험 폐기물 용기에 규정 라벨 (내용물·위험성·반입일)이 기재되어 있는가?","importance":"상","frequency":"weekly","standard":"EPA RCRA","states":[]},{"id":"IV-2-5","text":"현장 보관 기한 (SQG 270일 / LQG 90일)이 준수되고 있는가?","importance":"상","frequency":"monthly","standard":"EPA RCRA","states":[]},{"id":"IV-2-6","text":"[★ CA Only] DTSC 등록 및 연간 보고가 이루어지고 있는가?","importance":"상","frequency":"annual","standard":"CA DTSC","states":["CA"],"state_type":"CA_only"}]},{"id":"IV-3","name":"가스 실린더·위험물 운송","en":"Gas Cylinder & DOT","keywords":["실린더","cylinder","DOT","운송","transport","가스","gas"],"items":[{"id":"IV-3-1","text":"가스 실린더가 직립으로 체인·스트랩 2개소 고정되어 있는가?","importance":"상","frequency":"weekly","standard":"OSHA 29 CFR 1910.101","states":[]},{"id":"IV-3-2","text":"가연성 가스와 산소 실린더가 20ft 이상 이격되어 있는가?","importance":"상","frequency":"weekly","standard":"OSHA 29 CFR 1910.101","states":[]},{"id":"IV-3-3","text":"이동·보관 시 밸브 보호 캡이 부착되어 있는가?","importance":"상","frequency":"weekly","standard":"CGA","states":[]},{"id":"IV-3-4","text":"위험물 담당자가 DOT Hazmat Training을 이수했는가? (3년 주기)","importance":"상","frequency":"event","standard":"DOT 49 CFR","states":[]},{"id":"IV-3-5","text":"ERG (비상 대응 가이드)가 현장에 비치되어 있는가?","importance":"상","frequency":"annual","standard":"DOT","states":[]},{"id":"IV-3-6","text":"[★ CA Only] 독성 가스 Toxic Gas Permit이 취득되어 있는가?","importance":"상","frequency":"annual","standard":"Cal/OSHA","states":["CA"],"state_type":"CA_only"},{"id":"IV-3-7","text":"[★ NJ Only] NJ DEP Right-to-Know 신고가 완료되어 있는가?","importance":"상","frequency":"annual","standard":"NJ TCPA","states":["NJ"],"state_type":"state_specific"}]}]},{"id":"V","part":"A","name":"장비","en":"Equipment","risk":"High","keywords":["장비","equipment","지게차","forklift","컨베이어","conveyor","LOTO","도크","dock"],"sections":[{"id":"V-1","name":"지게차 일상 점검·운전 자격","en":"Forklift Inspection & Certification","keywords":["지게차","forklift","포크","fork","자격","certification","pre-shift"],"items":[{"id":"V-1-1","text":"매 교대 전 Pre-Shift Checklist가 작성되고 있는가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.178(q)","states":[]},{"id":"V-1-2","text":"포크 두께가 원래 두께의 90% 이상인가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.178","states":[]},{"id":"V-1-3","text":"브레이크 (주차·서비스)가 정상 작동하는가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.178","states":[]},{"id":"V-1-4","text":"경음기·조명·경고등이 정상 작동하는가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.178","states":[]},{"id":"V-1-5","text":"안전벨트·오버헤드 가드·백레스트에 이상이 없는가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.178","states":[]},{"id":"V-1-6","text":"모든 지게차 운전자가 회사 자격 인증을 보유하는가?","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1910.178(l)","states":[]},{"id":"V-1-7","text":"운전자 자격이 3년 주기로 갱신되고 있는가?","importance":"상","frequency":"event","standard":"OSHA 29 CFR 1910.178(l)","states":[]},{"id":"V-1-8","text":"[★ CA Only] 보행자-지게차 물리적 분리 시설이 설치되어 있는가?","importance":"상","frequency":"annual","standard":"Cal/OSHA","states":["CA"],"state_type":"CA_only"}]},{"id":"V-2","name":"지게차 안전 운행","en":"Forklift Safe Operation","keywords":["지게차","forklift","속도","speed","하중","load","주차","parking"],"items":[{"id":"V-2-1","text":"창고 내 속도 제한 표지가 부착되어 있으며 준수되는가? (일반 5 mph)","importance":"상","frequency":"weekly","standard":"OSHA 29 CFR 1910.178(n)","states":[]},{"id":"V-2-2","text":"지게차 명판 최대 하중이 초과되지 않는가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.178(o)","states":[]},{"id":"V-2-3","text":"경사로 운행 시 하중 방향 규정이 준수되는가?","importance":"상","frequency":"weekly","standard":"OSHA 29 CFR 1910.178","states":[]},{"id":"V-2-4","text":"주차 시 포크 하강·브레이크·키 제거가 이루어지는가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.178","states":[]},{"id":"V-2-5","text":"통로·비상구·소화기 앞 지게차 주차가 없는가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.178","states":[]},{"id":"V-2-6","text":"[★ WA Only] 창고 쿼터 기준 휴식·화장실 시간 보장이 확인되는가? (HB 1762)","importance":"상","frequency":"monthly","standard":"WA HB 1762","states":["WA"],"state_type":"state_specific"}]},{"id":"V-3","name":"컨베이어·LOTO·기계 방호","en":"Conveyor, LOTO & Machine Guarding","keywords":["컨베이어","conveyor","LOTO","lockout","tagout","방호","guarding","E-Stop"],"items":[{"id":"V-3-1","text":"모든 구동부에 방호 커버가 설치되어 있는가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.212","states":[]},{"id":"V-3-2","text":"비상 정지 장치 (Pull Cord / E-Stop)가 전 구간에 설치되어 있는가?","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1910.217","states":[]},{"id":"V-3-3","text":"월 1회 비상 정지 장치 작동 시험 기록이 보관되는가?","importance":"상","frequency":"monthly","standard":"ASME B20.1","states":[]},{"id":"V-3-4","text":"장비별 LOTO 절차서가 작성되어 현장에 비치되어 있는가?","importance":"상","frequency":"annual","standard":"OSHA 29 CFR 1910.147","states":[]},{"id":"V-3-5","text":"LOTO 장비 보관함이 완비되어 있는가? (자물쇠·태그·하스프·플러그)","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1910.147","states":[]},{"id":"V-3-6","text":"정비·수리 시 LOTO 6단계 절차가 준수되는가?","importance":"상","frequency":"event","standard":"OSHA 29 CFR 1910.147","states":[]},{"id":"V-3-7","text":"[★ CA Only] LOTO 교육 기록이 3년 이상 보관되는가?","importance":"중","frequency":"annual","standard":"Cal/OSHA","states":["CA"],"state_type":"CA_only"}]},{"id":"V-4","name":"배터리 충전·고소 작업","en":"Battery Charging & AWP","keywords":["배터리","battery","충전","charging","고소","aerial","AWP","수소","hydrogen"],"items":[{"id":"V-4-1","text":"충전 구역 환기 시스템이 정상 작동하는가? (수소 가스 1% 미만)","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.178(g)","states":[]},{"id":"V-4-2","text":"충전 구역 내 금연·화기 금지 표지가 부착되어 있는가?","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1910.178","states":[]},{"id":"V-4-3","text":"과충전 방지 장치 (Auto Cutoff)가 정상 작동하는가?","importance":"상","frequency":"monthly","standard":"","states":[]},{"id":"V-4-4","text":"AWP 탑승 시 전신 안전 벨트 + 랜야드가 착용되는가?","importance":"상","frequency":"event","standard":"OSHA 29 CFR 1910.28","states":[]},{"id":"V-4-5","text":"매 사용 전 AWP 운전 전 점검이 실시되는가?","importance":"상","frequency":"event","standard":"OSHA 29 CFR 1910.28","states":[]},{"id":"V-4-6","text":"실외 풍속 28 mph 초과 시 고소 작업이 중단되는가?","importance":"상","frequency":"event","standard":"OSHA 29 CFR 1910.28","states":[]}]}]},{"id":"VI","part":"A","name":"보건","en":"Occupational Health","risk":"High","keywords":["보건","health","PPE","온열","heat","소음","noise","응급","first aid","AED","ergonomics"],"sections":[{"id":"VI-1","name":"온열·한랭 질환 예방","en":"Heat & Cold Illness Prevention","keywords":["온열","heat","한랭","cold","체온","temperature","음용수","water","휴식"],"items":[{"id":"VI-1-1","text":"온열 질환 예방 프로그램이 문서화되어 있는가?","importance":"상","frequency":"annual","standard":"OSHA Heat Illness Prevention","states":[]},{"id":"VI-1-2","text":"작업자 1인당 시간당 1L 이상 음용수가 제공되는가?","importance":"상","frequency":"daily","standard":"OSHA","states":[]},{"id":"VI-1-3","text":"5분 이내 도달 가능한 그늘·냉방 휴식 공간이 확보되는가?","importance":"상","frequency":"daily","standard":"OSHA","states":[]},{"id":"VI-1-4","text":"신규 배치자 7~14일 순응 기간 (Acclimatization)이 부여되는가?","importance":"상","frequency":"event","standard":"OSHA","states":[]},{"id":"VI-1-5","text":"[★ CA Only] 실내 기온 95°F 초과 시 냉방·휴식 조치 절차가 수립되어 있는가?","importance":"상","frequency":"daily","standard":"CA AB 2043","states":["CA"],"state_type":"CA_only"},{"id":"VI-1-6","text":"[⚠ TX/FL/GA/IL] 여름철 Heat Index 일일 모니터링이 이루어지는가?","importance":"상","frequency":"daily","standard":"","states":["TX","FL","GA","IL"],"state_type":"weather"},{"id":"VI-1-7","text":"[⚠ PA/NJ/WA] 냉동 창고 2인 1조 작업·비상 탈출 손잡이 확인","importance":"상","frequency":"daily","standard":"","states":["PA","NJ","WA"],"state_type":"weather"}]},{"id":"VI-2","name":"PPE·응급처치·AED","en":"PPE, First Aid & AED","keywords":["PPE","보호구","응급","first aid","AED","응급처치","안전화","장갑"],"items":[{"id":"VI-2-1","text":"작업별 PPE Hazard Assessment가 문서화되어 있는가?","importance":"상","frequency":"annual","standard":"OSHA 29 CFR 1910.132","states":[]},{"id":"VI-2-2","text":"전 작업자가 ASTM F2413 기준 안전화를 착용하는가?","importance":"상","frequency":"daily","standard":"OSHA 29 CFR 1910.136","states":[]},{"id":"VI-2-3","text":"지게차 구역 진입 시 Hi-Vis 조끼 (Class 2)가 착용되는가?","importance":"상","frequency":"daily","standard":"ANSI/ISEA 107","states":[]},{"id":"VI-2-4","text":"응급처치함이 작업 구역 100ft 이내에 비치되어 있는가?","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1910.151","states":[]},{"id":"VI-2-5","text":"AED가 설치되어 있으며 패드·배터리 상태가 유효한가?","importance":"상","frequency":"monthly","standard":"","states":[]},{"id":"VI-2-6","text":"AED 사용 교육이 연 1회 이상 실시되는가?","importance":"상","frequency":"annual","standard":"","states":[]},{"id":"VI-2-7","text":"[⚠ TX/FL] 독사·독충 물림 응급처치 절차가 비치되어 있는가?","importance":"중","frequency":"annual","standard":"","states":["TX","FL"],"state_type":"weather"}]},{"id":"VI-3","name":"소음·산업위생·사고 기록","en":"Noise, IH & Recordkeeping","keywords":["소음","noise","청력","hearing","OSHA 300","사고","incident","기록","산업위생"],"items":[{"id":"VI-3-1","text":"85 dBA 이상 구역에 청력 보호구 착용 표지가 부착되어 있는가?","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1910.95","states":[]},{"id":"VI-3-2","text":"소음 노출 작업자 청력 검사가 연 1회 실시되는가?","importance":"상","frequency":"annual","standard":"OSHA 29 CFR 1910.95","states":[]},{"id":"VI-3-3","text":"50 lbs 초과 중량물 2인 공동 작업이 준수되는가?","importance":"상","frequency":"daily","standard":"NIOSH","states":[]},{"id":"VI-3-4","text":"OSHA 300 Log가 작성·보관되고 있는가?","importance":"상","frequency":"monthly","standard":"OSHA 29 CFR 1904","states":[]},{"id":"VI-3-5","text":"OSHA 300A가 2월 1일~4월 30일 게시되었는가?","importance":"상","frequency":"annual","standard":"OSHA 29 CFR 1904","states":[]},{"id":"VI-3-6","text":"[★ CA Only] IIPP가 문서화되어 있으며 연간 검토가 이루어지는가?","importance":"상","frequency":"annual","standard":"Cal/OSHA","states":["CA"],"state_type":"CA_only"},{"id":"VI-3-7","text":"[★ CA Only] CA SB 553 직장 폭력 예방 계획이 수립·시행되고 있는가?","importance":"상","frequency":"annual","standard":"CA SB 553","states":["CA"],"state_type":"CA_only"},{"id":"VI-3-8","text":"[★ WA Only] APP (Accident Prevention Program) 연간 검토 (WISHA)","importance":"상","frequency":"annual","standard":"WISHA","states":["WA"],"state_type":"state_specific"}]}]},{"id":"VII","part":"A","name":"전기","en":"Electrical","risk":"Critical","keywords":["전기","electrical","분전반","panel","UPS","발전기","generator","Arc Flash","LOTO","접지","grounding"],"sections":[{"id":"VII-1","name":"분전반·배선·접지","en":"Panels, Wiring & Grounding","keywords":["분전반","panel","배선","wiring","접지","grounding","GFCI","차단기","breaker"],"items":[{"id":"VII-1-1","text":"분전반 전면 36인치 이상 작업 공간이 확보되는가?","importance":"상","frequency":"weekly","standard":"OSHA 29 CFR 1910.303(g) / NFPA 70 NEC","states":[]},{"id":"VII-1-2","text":"모든 차단기에 회로별 라벨링이 명확히 되어 있는가?","importance":"상","frequency":"quarterly","standard":"NFPA 70 NEC","states":[]},{"id":"VII-1-3","text":"미사용 개구부가 방화 플러그로 완전 밀폐되어 있는가?","importance":"상","frequency":"quarterly","standard":"NFPA 70 NEC","states":[]},{"id":"VII-1-4","text":"바닥 노출 배선이 없는가?","importance":"상","frequency":"weekly","standard":"OSHA 29 CFR 1910.305","states":[]},{"id":"VII-1-5","text":"습기 구역에 GFCI 콘센트가 설치되어 있는가?","importance":"상","frequency":"monthly","standard":"NFPA 70 NEC 210.8","states":[]},{"id":"VII-1-6","text":"연 1회 열화상 검사가 실시되고 기록이 보관되는가?","importance":"상","frequency":"annual","standard":"NFPA 70B","states":[]},{"id":"VII-1-7","text":"[★ CA Only] 분전반 앵커 고정 상태가 CBC 내진 기준을 충족하는가?","importance":"상","frequency":"annual","standard":"CBC","states":["CA"],"state_type":"CA_only"}]},{"id":"VII-2","name":"UPS·비상발전기","en":"UPS & Emergency Generator","keywords":["UPS","발전기","generator","배터리","battery","ATS","연료","fuel"],"items":[{"id":"VII-2-1","text":"UPS 실 온도·습도가 적정 범위 (25°C±5°C / 40%±10%) 내에 있는가?","importance":"상","frequency":"monthly","standard":"","states":[]},{"id":"VII-2-2","text":"배터리 외관에 배부름·균열·누액·발열이 없는가?","importance":"상","frequency":"monthly","standard":"","states":[]},{"id":"VII-2-3","text":"연 1회 UPS 전부하 방전 시험이 실시되고 기록이 보관되는가?","importance":"상","frequency":"annual","standard":"NFPA 110","states":[]},{"id":"VII-2-4","text":"발전기 연료 잔량이 75% 이상 유지되는가?","importance":"상","frequency":"weekly","standard":"NFPA 110","states":[]},{"id":"VII-2-5","text":"발전기 주간 자동 기동 시험 기록이 보관되는가?","importance":"상","frequency":"weekly","standard":"NFPA 110","states":[]},{"id":"VII-2-6","text":"ATS 자동 절체 기능이 정상 작동하는가? (10~30초 이내)","importance":"상","frequency":"monthly","standard":"NFPA 110","states":[]},{"id":"VII-2-7","text":"[★ CA Only] CARB Tier 4 Final 기준 준수 여부가 확인되었는가?","importance":"상","frequency":"annual","standard":"CARB","states":["CA"],"state_type":"CA_only"},{"id":"VII-2-8","text":"[⚠ FL/TX] 허리케인 시즌 전 전부하 시험 및 연료 만충이 완료되었는가?","importance":"상","frequency":"event","standard":"","states":["FL","TX"],"state_type":"weather"}]},{"id":"VII-3","name":"Arc Flash·LOTO·전기 안전","en":"Arc Flash, LOTO & Electrical Safety","keywords":["Arc Flash","아크","LOTO","lockout","검전기","절연","Megger","energized"],"items":[{"id":"VII-3-1","text":"전기 작업 전 차단기 OFF 및 개인 자물쇠 잠금이 이루어지는가?","importance":"상","frequency":"event","standard":"OSHA 29 CFR 1910.147","states":[]},{"id":"VII-3-2","text":"무전압 확인 (검전기 사용)이 실시되는가?","importance":"상","frequency":"event","standard":"NFPA 70E","states":[]},{"id":"VII-3-3","text":"모든 전기 패널에 Arc Flash 경고 라벨이 부착되어 있는가?","importance":"상","frequency":"quarterly","standard":"NFPA 70E","states":[]},{"id":"VII-3-4","text":"Arc Flash PPE가 Incident Energy 등급에 맞게 구비되어 있는가?","importance":"상","frequency":"annual","standard":"NFPA 70E","states":[]},{"id":"VII-3-5","text":"활선 작업 시 Energized Work Permit이 발행되는가?","importance":"상","frequency":"event","standard":"NFPA 70E","states":[]},{"id":"VII-3-6","text":"연 1회 절연 저항 측정 (Megger Test)이 실시되는가?","importance":"상","frequency":"annual","standard":"NFPA 70B","states":[]},{"id":"VII-3-7","text":"[★ CA Only] Arc Flash Analysis 결과가 3년 이상 보관되는가?","importance":"중","frequency":"annual","standard":"Cal/OSHA","states":["CA"],"state_type":"CA_only"},{"id":"VII-3-8","text":"[★ WA Only] 지진 후 전기 설비 전수 점검 절차가 수립되어 있는가?","importance":"상","frequency":"annual","standard":"WISHA","states":["WA"],"state_type":"state_specific"}]}]},{"id":"VIII-IX","part":"B","name":"건물·TI 원상태 관리","en":"Building & Tenant Improvement Condition","risk":"NWT/RR","keywords":["건물","building","TI","원상태","복구","바닥","floor","랙","임차","lease","decommission"],"sections":[{"id":"VIII-1","name":"바닥·벽면 원상태 판정 (NWT vs RR)","en":"Floor & Wall Condition","keywords":["바닥","floor","벽","wall","NWT","RR","원상복구","복구"],"items":[{"id":"VIII-1-1","text":"바닥 균열·파손이 정상 사용 범위를 초과하는가? → 초과 시 RR","importance":"상","frequency":"monthly","standard":"","states":[],"judgment":["NWT","MR","RR"]},{"id":"VIII-1-2","text":"화학물질 유출로 인한 착색·부식 흔적이 있는가? → 있으면 RR","importance":"상","frequency":"monthly","standard":"","states":[],"judgment":["NWT","RR"]},{"id":"VIII-1-3","text":"임차인 추가 에폭시·도장이 시공되어 있는가? → 있으면 RR","importance":"상","frequency":"biannual","standard":"","states":[],"judgment":["NWT","RR"]},{"id":"VIII-1-4","text":"벽면 대형 파손·지게차 충돌 흔적이 있는가? → 있으면 RR","importance":"상","frequency":"monthly","standard":"","states":[],"judgment":["NWT","RR"]},{"id":"VIII-1-5","text":"방화벽 임의 개구부가 발생했는가? → 있으면 즉시 RR","importance":"상","frequency":"quarterly","standard":"","states":[],"judgment":["NWT","RR"]},{"id":"VIII-1-6","text":"랙 앵커 구멍 현황 및 위치가 기록·관리되고 있는가? → 미기록 시 MR","importance":"중","frequency":"biannual","standard":"","states":[],"judgment":["NWT","MR","RR"]},{"id":"VIII-1-7","text":"바닥 상태 정기 사진 기록이 반기 1회 이상 보관되는가? → 미보관 시 MR","importance":"중","frequency":"biannual","standard":"","states":[],"judgment":["NWT","MR"]},{"id":"VIII-1-8","text":"[★ CA Only] Phase I ESA 결과가 보관되어 있는가?","importance":"상","frequency":"annual","standard":"ASTM E1527-21","states":["CA"],"state_type":"CA_only","judgment":["NWT","MR","RR"]}]},{"id":"VIII-2","name":"TI 공사·지붕·외부 부지","en":"TI Works, Roof & Exterior","keywords":["TI","공사","임대인","landlord","지붕","roof","주차장","parking"],"items":[{"id":"VIII-2-1","text":"모든 TI 공사에 임대인 서면 승인이 보관되는가? → 없으면 RR","importance":"상","frequency":"event","standard":"","states":[],"judgment":["NWT","RR"]},{"id":"VIII-2-2","text":"무허가 공사 항목이 식별되어 원복 계획이 수립되어 있는가?","importance":"상","frequency":"biannual","standard":"","states":[],"judgment":["NWT","MR","RR"]},{"id":"VIII-2-3","text":"지붕 임차인 추가 관통부 방수 처리 상태가 양호한가?","importance":"상","frequency":"biannual","standard":"","states":[],"judgment":["NWT","MR","RR"]},{"id":"VIII-2-4","text":"주차장 연료·오일 유출로 인한 포장면 오염이 없는가?","importance":"상","frequency":"monthly","standard":"","states":[],"judgment":["NWT","RR"]},{"id":"VIII-2-5","text":"[★ CA Only] TI 공사 건축 허가 서류·Final Inspection 완료증이 보관되는가?","importance":"상","frequency":"event","standard":"CBC","states":["CA"],"state_type":"CA_only","judgment":["NWT","RR"]},{"id":"VIII-2-6","text":"[★ IL Only] 토네이도 후 건물·BARA 피난처 점검 절차가 수립되어 있는가?","importance":"상","frequency":"annual","standard":"HB2987","states":["IL"],"state_type":"state_specific","judgment":["NWT","MR"]},{"id":"VIII-2-7","text":"[★ WA Only] 홍수·지진 후 건물 전수 점검 절차가 수립되어 있는가?","importance":"상","frequency":"annual","standard":"WISHA","states":["WA"],"state_type":"state_specific","judgment":["NWT","MR"]}]}]},{"id":"X-XI","part":"B","name":"환경 오염·위험물질 잔류","en":"Environmental Liability & Hazmat Residual","risk":"NWT/RR","keywords":["환경","environment","오염","contamination","토양","soil","Phase I","ESA","석면","asbestos","냉매"],"sections":[{"id":"X-1","name":"Phase I ESA·토양·지하수 오염","en":"Phase I ESA & Soil/Groundwater","keywords":["Phase I","ESA","토양","soil","지하수","groundwater","오염","contamination"],"items":[{"id":"X-1-1","text":"입주 시 Phase I ESA 결과가 보관되어 있는가? → 없으면 RR","importance":"상","frequency":"annual","standard":"ASTM E1527-21","states":[],"judgment":["NWT","RR"]},{"id":"X-1-2","text":"화학물질 보관 구역 하부 토양 오염 모니터링이 이루어지는가?","importance":"상","frequency":"annual","standard":"EPA RSL","states":[],"judgment":["NWT","MR","RR"]},{"id":"X-1-3","text":"오염 기준 초과 시 임대인 즉시 통보 절차가 수립되어 있는가?","importance":"상","frequency":"annual","standard":"","states":[],"judgment":["NWT","MR"]},{"id":"X-1-4","text":"화학물질 유출 이력 및 처리 기록이 보관되는가?","importance":"상","frequency":"event","standard":"","states":[],"judgment":["NWT","MR","RR"]},{"id":"X-1-5","text":"[★ CA Only] RWQCB 보고 의무 해당 여부가 확인되었는가?","importance":"상","frequency":"annual","standard":"CA RWQCB","states":["CA"],"state_type":"CA_only","judgment":["NWT","MR","RR"]},{"id":"X-1-6","text":"[TX] TCEQ 환경 보고 의무 확인","importance":"중","frequency":"annual","standard":"TCEQ","states":["TX"],"state_type":"state_specific","judgment":["NWT","MR"]},{"id":"X-1-7","text":"[IL] IEPA 환경 보고 의무 확인","importance":"중","frequency":"annual","standard":"IEPA","states":["IL"],"state_type":"state_specific","judgment":["NWT","MR"]},{"id":"X-1-8","text":"[NJ] NJ DEP 환경 보고 의무 확인","importance":"중","frequency":"annual","standard":"NJ DEP","states":["NJ"],"state_type":"state_specific","judgment":["NWT","MR"]},{"id":"X-1-9","text":"[WA] WA Dept. of Ecology 보고 의무 확인","importance":"중","frequency":"annual","standard":"WA Ecology","states":["WA"],"state_type":"state_specific","judgment":["NWT","MR"]}]},{"id":"X-2","name":"석면·납·냉매·위험 폐기물 잔류","en":"ACM, Lead, Refrigerant & Waste","keywords":["석면","asbestos","납","lead","냉매","refrigerant","폐기물","waste","잔류"],"items":[{"id":"X-2-1","text":"1980년 이전 건축물 — 석면 조사 결과가 보관되어 있는가?","importance":"상","frequency":"annual","standard":"EPA AHERA","states":[],"judgment":["NWT","RR"]},{"id":"X-2-2","text":"납 성분 도료 검사 결과가 보관되어 있는가? (해당 시)","importance":"상","frequency":"annual","standard":"EPA RRP","states":[],"judgment":["NWT","RR"]},{"id":"X-2-3","text":"냉매 회수 계획이 수립되어 있는가? (퇴거 시)","importance":"중","frequency":"annual","standard":"EPA Section 608","states":[],"judgment":["NWT","MR"]},{"id":"X-2-4","text":"화학물질 재고 목록이 최신화되어 있는가?","importance":"중","frequency":"quarterly","standard":"","states":[],"judgment":["NWT","MR"]},{"id":"X-2-5","text":"위험 폐기물 처리 완료 Manifest가 보관되는가?","importance":"상","frequency":"event","standard":"EPA RCRA","states":[],"judgment":["NWT","MR","RR"]},{"id":"X-2-6","text":"[★ CA Only] DTSC 반출 신고 절차가 수립되어 있는가?","importance":"상","frequency":"annual","standard":"CA DTSC","states":["CA"],"state_type":"CA_only","judgment":["NWT","MR","RR"]}]}]},{"id":"XII-XIII","part":"B","name":"설비·전기 원상태 관리","en":"Utility & MEP Condition","risk":"NWT/RR","keywords":["설비","utility","전기","electrical","HVAC","배관","원상태","반환"],"sections":[{"id":"XII-1","name":"HVAC·배관 원상태","en":"HVAC & Plumbing Condition","keywords":["HVAC","배관","원상태","유지보수","기록"],"items":[{"id":"XII-1-1","text":"HVAC 정기 유지보수 기록이 체계적으로 보관되는가? → 없으면 RR","importance":"상","frequency":"monthly","standard":"","states":[],"judgment":["NWT","MR","RR"]},{"id":"XII-1-2","text":"임차인 추가 HVAC 처리 계획이 수립되어 있는가?","importance":"중","frequency":"annual","standard":"","states":[],"judgment":["NWT","MR"]},{"id":"XII-1-3","text":"배관 누수 발생·수리 이력이 기록되는가? → 미기록 시 RR","importance":"상","frequency":"event","standard":"","states":[],"judgment":["NWT","MR","RR"]},{"id":"XII-1-4","text":"추가 배관 퇴거 시 원복 계획이 수립되어 있는가?","importance":"중","frequency":"annual","standard":"","states":[],"judgment":["NWT","MR"]},{"id":"XII-1-5","text":"[★ CA Only] CARB HFC 냉매 전환 이행 기록이 보관되는가?","importance":"중","frequency":"annual","standard":"CARB","states":["CA"],"state_type":"CA_only","judgment":["NWT","MR"]},{"id":"XII-1-6","text":"[⚠ PA/NJ/WA] 동파로 인한 배관 손상 이력이 기록되는가?","importance":"상","frequency":"event","standard":"","states":["PA","NJ","WA"],"state_type":"weather","judgment":["NWT","MR","RR"]}]},{"id":"XII-2","name":"전기 설비 원상태·반환 계획","en":"Electrical Condition & Return Plan","keywords":["전기","electrical","분전반","배선","반환","임시배선"],"items":[{"id":"XII-2-1","text":"전기 계통도 및 분전반 Baseline이 보관되는가?","importance":"중","frequency":"annual","standard":"","states":[],"judgment":["NWT","MR"]},{"id":"XII-2-2","text":"임차인 추가 전기 공사 허가서·검사 완료증이 보관되는가? → 없으면 RR","importance":"상","frequency":"event","standard":"","states":[],"judgment":["NWT","RR"]},{"id":"XII-2-3","text":"임시 배선 철거 계획이 수립되어 있는가?","importance":"상","frequency":"annual","standard":"","states":[],"judgment":["NWT","MR","RR"]},{"id":"XII-2-4","text":"UPS·발전기 철거 반출 계획이 수립되어 있는가?","importance":"중","frequency":"annual","standard":"","states":[],"judgment":["NWT","MR"]},{"id":"XII-2-5","text":"전기 설비 정기 유지보수 기록이 보관되는가?","importance":"상","frequency":"annual","standard":"","states":[],"judgment":["NWT","MR","RR"]},{"id":"XII-2-6","text":"[★ CA Only] 추가 전기 공사 CA 건축 허가 서류가 보관되는가?","importance":"상","frequency":"event","standard":"CBC","states":["CA"],"state_type":"CA_only","judgment":["NWT","RR"]}]}]},{"id":"XIV-XV","part":"B","name":"임대차 문서·비용 예측","en":"Lease Documents & Cost Estimation","risk":"NWT/RR","keywords":["임대","lease","계약","contract","비용","cost","원상복구","보증금","deposit"],"sections":[{"id":"XIV-1","name":"임대차 계약·허가 문서 관리","en":"Lease & Permit Documents","keywords":["임대차","lease","계약","amendment","허가","permit","보증금"],"items":[{"id":"XIV-1-1","text":"임대차 계약서 원본 및 모든 Amendment가 보관되는가? → 없으면 RR","importance":"상","frequency":"event","standard":"","states":[],"judgment":["NWT","RR"]},{"id":"XIV-1-2","text":"입주 시 Condition Report 임대인 서명본이 보관되는가? → 없으면 RR","importance":"상","frequency":"annual","standard":"","states":[],"judgment":["NWT","RR"]},{"id":"XIV-1-3","text":"원상복구 조항 내 NWT 범위가 명확히 파악되어 있는가?","importance":"중","frequency":"annual","standard":"","states":[],"judgment":["NWT","MR"]},{"id":"XIV-1-4","text":"퇴거 통보 기간이 파악되어 일정 관리에 반영되어 있는가?","importance":"중","frequency":"annual","standard":"","states":[],"judgment":["NWT","MR"]},{"id":"XIV-1-5","text":"모든 운영 허가 목록이 최신화되어 있는가?","importance":"중","frequency":"annual","standard":"","states":[],"judgment":["NWT","MR"]},{"id":"XIV-1-6","text":"[★ CA Only] HMBP·CERS 폐쇄 절차가 수립되어 있는가?","importance":"중","frequency":"annual","standard":"CA HMBP","states":["CA"],"state_type":"CA_only","judgment":["NWT","MR"]}]},{"id":"XV-1","name":"Decommissioning 비용 예측 (출처 기반)","en":"Cost Estimation (Source-Based)","keywords":["비용","cost","원상복구","restoration","예산","budget","견적","estimate"],"items":[{"id":"XV-1-1","text":"원상복구 비용 예측이 연 1회 업데이트되는가?","importance":"중","frequency":"annual","standard":"","states":[],"judgment":["NWT","MR"]},{"id":"XV-1-2","text":"충당금이 예산에 반영되어 있는가?","importance":"중","frequency":"annual","standard":"","states":[],"judgment":["NWT","MR"]},{"id":"XV-1-3","text":"[참고] 상업용 내부 철거: $2~7/sqft (Hometown Demolition 2024)","importance":"참고","frequency":"annual","standard":"Hometown Demolition (2024)","states":[],"judgment":[]},{"id":"XV-1-4","text":"[참고] 상업용 건물 전체 철거: $4~8/sqft (CRE Loans 2024)","importance":"참고","frequency":"annual","standard":"CRE Loans (2024)","states":[],"judgment":[]},{"id":"XV-1-5","text":"[참고] 석면 제거: $5~20/sqft (Angi/HomeAdvisor 2025~26)","importance":"참고","frequency":"annual","standard":"Angi / HomeAdvisor (2025~26)","states":[],"judgment":[]},{"id":"XV-1-6","text":"[★ CA Only 참고] 토양 오염 정화: $15~45/sqft (Substrata LA 2025)","importance":"참고","frequency":"annual","standard":"Substrata LA (2025)","states":["CA"],"state_type":"CA_only","judgment":[]},{"id":"XV-1-7","text":"[참고] Phase I ESA: $1,900~6,500/건 (Geo Forward 2024)","importance":"참고","frequency":"annual","standard":"Geo Forward (2024)","states":[],"judgment":[]},{"id":"XV-1-8","text":"[참고] Decommissioning 전체: $3.5~6/sqft (Conesco 실사례 2025)","importance":"참고","frequency":"annual","standard":"Conesco (2025)","states":[],"judgment":[]},{"id":"XV-1-9","text":"에폭시 제거·앵커 구멍 복구·위험 폐기물 처리: 현장 견적 필수","importance":"참고","frequency":"annual","standard":"","states":[],"judgment":[]}]}]}]};
+const DATA=RAW;
+const FL={daily:'일간',weekly:'주간',monthly:'월간',quarterly:'분기',biannual:'반기',annual:'연간',event:'이벤트'};
+const RISK_MAP={'Critical':'r-c','High':'r-h','Medium':'r-m','NWT/RR':'r-n'};
+const STATE_INFO={
+  TX:{name:'Texas',plan:'Federal OSHA',notes:'TCEQ | 폭염·허리케인'},
+  PA:{name:'Pennsylvania',plan:'Federal OSHA',notes:'PA DEP | 동절기 결빙'},
+  FL:{name:'Florida',plan:'Federal OSHA',notes:'FDEP | 허리케인(6~11월)'},
+  CA:{name:'California',plan:'Cal/OSHA ★',notes:'Prop 65 | CARB | DTSC | 지진'},
+  IL:{name:'Illinois',plan:'Federal+HB2987',notes:'토네이도 대피 의무 | IEPA'},
+  GA:{name:'Georgia',plan:'Federal OSHA',notes:'GA EPD | 여름 고온·폭풍'},
+  NJ:{name:'New Jersey',plan:'Federal+PEOSH',notes:'NJ DEP | Right-to-Know'},
+  WA:{name:'Washington',plan:'WISHA ★',notes:'L&I/DOSH | APP | HB1762'}
+};
+let curSt='ALL',curFreq='ALL',curQ='';
+const CK={};
+let isListening=false,recog=null,voiceOpen=false;
+let curTab='checklist';
+
+function switchTab(tab,topBtn,botBtn){
+  curTab=tab;
+  ['checklist','schedule','cost','about'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=t===tab?'block':'none';
+    document.getElementById('bnav-'+t).classList.toggle('active',t===tab);
+  });
+  if(tab==='schedule') buildSchedule();
+  if(tab==='about') buildAbout();
+}
+
+function setSt(st,btn){
+  curSt=st;
+  document.querySelectorAll('.sp').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderChecklist();
+}
+function setFreq(f,btn){
+  curFreq=f;
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderChecklist();
+}
+function onSearch(v){
+  curQ=v;
+  if(v){document.getElementById('voice-panel').style.display='none';voiceOpen=false;}
+  renderChecklist();
+  if(v){
+    document.querySelectorAll('.sec-group').forEach(s=>s.style.display='block');
+    document.querySelectorAll('.items-body').forEach(b=>b.style.display='block');
+    document.querySelectorAll('.chev').forEach(c=>c.classList.add('open'));
+  }
+}
+
+function stExcl(stArr,st){
+  if(st==='ALL'||!stArr||!stArr.length) return false;
+  const ALL_ST=['TX','PA','FL','CA','IL','GA','NJ','WA'];
+  return stArr.every(s=>ALL_ST.includes(s))&&!stArr.includes(st);
+}
+function stMatch(stArr,st){
+  if(!stArr||!stArr.length) return true;
+  if(st==='ALL') return true;
+  return stArr.includes(st);
+}
+function matchQ(item,sec,cat){
+  if(!curQ) return true;
+  const q=curQ.toLowerCase();
+  const words=q.split(/\s+/).filter(w=>w.length>0);
+  const blob=(item.text+' '+(sec.name||'')+' '+(cat.name||'')+' '+(cat.en||'')+' '+
+    (sec.keywords||[]).join(' ')+' '+(cat.keywords||[]).join(' ')+' '+(item.standard||'')+' '+(FL[item.frequency]||'')+' '+(item.frequency||'')).toLowerCase();
+  return words.some(w=>blob.includes(w));
+}
+function hl(t){
+  if(!curQ) return t;
+  const words=curQ.trim().split(/\s+/).filter(w=>w.length>1);
+  let r=t;
+  words.forEach(w=>{
+    const re=new RegExp('('+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+    r=r.replace(re,'<mark class="hi">$1</mark>');
+  });
+  return r;
+}
+
+function renderChecklist(){
+  const body=document.getElementById('checklist-body');
+  body.innerHTML='';
+  let tot=0,chk=0,crit=0,stSpec=0;
+  DATA.categories.forEach((cat,ci)=>{
+    const catItems=[];
+    cat.sections.forEach((sec,si)=>{
+      sec.items.forEach((item,ii)=>{
+        if(stExcl(item.states,curSt)) return;
+        if(curFreq!=='ALL'&&item.frequency!==curFreq) return;
+        if(!matchQ(item,sec,cat)) return;
+        catItems.push({cat,sec,item,ci,si,ii});
+      });
+    });
+    if(!catItems.length) return;
+    const div=document.createElement('div');
+    div.className='cat-group';
+    const head=document.createElement('div');
+    head.className='cat-head';
+    head.innerHTML=`<span class="cat-part ${cat.part==='A'?'pa':'pb'}">PART ${cat.part}</span><span class="cat-name">${cat.name}</span><span class="risk-b ${RISK_MAP[cat.risk]||'r-m'}">${cat.risk}</span><span class="cat-cnt">${catItems.length}건</span><span class="chev">▾</span>`;
+    const secBody=document.createElement('div');
+    secBody.className='sec-group';
+    let lastSec='';
+    let curSecEl=null,curItemsEl=null;
+    catItems.forEach(({cat,sec,item,ci,si,ii})=>{
+      tot++;
+      const k=`${ci}-${si}-${ii}`;
+      if(CK[k]) chk++;
+      if(cat.risk==='Critical') crit++;
+      if(item.states&&item.states.length) stSpec++;
+      if(sec.id!==lastSec){
+        lastSec=sec.id;
+        curSecEl=document.createElement('div');
+        const filtCount=sec.items.filter(it=>{
+          if(stExcl(it.states,curSt)) return false;
+          if(curFreq!=='ALL'&&it.frequency!==curFreq) return false;
+          if(!matchQ(it,sec,cat)) return false;
+          return true;
+        }).length;
+        const sh=document.createElement('div');
+        sh.className='sec-head';
+        sh.innerHTML=`<span class="sec-name">${sec.name}</span><span class="sec-cnt">${filtCount}건</span><span class="chev">▾</span>`;
+        curItemsEl=document.createElement('div');
+        curItemsEl.className='items-body';
+        sh.onclick=()=>{
+          const open=curItemsEl.style.display==='block';
+          curItemsEl.style.display=open?'none':'block';
+          sh.querySelector('.chev').classList.toggle('open',!open);
+        };
+        curSecEl.appendChild(sh);
+        curSecEl.appendChild(curItemsEl);
+        secBody.appendChild(curSecEl);
+      }
+      const isSt=item.states&&item.states.length&&curSt!=='ALL'&&stMatch(item.states,curSt)&&item.states.length;
+      const ic=document.createElement('div');
+      ic.className='item-card'+(isSt?' state-hi':'');
+      const checked=CK[k];
+      const stHtml=item.states&&item.states.length?`<span class="stag">${item.states.join('/')}</span>`:'';
+      const stdHtml=item.standard?`<span class="stdtag">${item.standard}</span>`:'';
+      ic.innerHTML=`<div class="chk-circle ${checked?'done':''}" onclick="togChk(event,'${k}',this)"></div>
+        <div class="item-body">
+          <div class="item-text ${checked?'done':''}">${hl(item.text)}</div>
+          <div class="item-meta"><span class="ftag f-${item.frequency}">${FL[item.frequency]||item.frequency}</span>${stHtml}${stdHtml}</div>
+        </div>`;
+      curItemsEl.appendChild(ic);
+    });
+    head.onclick=()=>{
+      const open=secBody.style.display==='block';
+      secBody.style.display=open?'none':'block';
+      head.querySelector('.chev').classList.toggle('open',!open);
+      if(!open){
+        secBody.querySelectorAll('.items-body').forEach(b=>b.style.display='block');
+        secBody.querySelectorAll('.chev').forEach(c=>c.classList.add('open'));
+      }
+    };
+    div.appendChild(head);
+    div.appendChild(secBody);
+    body.appendChild(div);
+  });
+  if(!body.children.length){
+    body.innerHTML=`<div class="empty-state"><span class="empty-icon">🔍</span><div class="empty-text">검색 결과가 없습니다.<br>다른 키워드나 필터를 시도해보세요.</div></div>`;
+  }
+  document.getElementById('s-total').textContent=tot;
+  document.getElementById('s-checked').textContent=chk;
+  document.getElementById('s-critical').textContent=crit;
+  document.getElementById('s-state').textContent=stSpec;
+  const pct=tot>0?Math.round(chk/tot*100):0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+}
+
+function togChk(e,k,el){
+  e.stopPropagation();
+  CK[k]=!CK[k];
+  el.classList.toggle('done',CK[k]);
+  el.closest('.item-card').querySelector('.item-text').classList.toggle('done',CK[k]);
+  let chk=Object.values(CK).filter(Boolean).length;
+  document.getElementById('s-checked').textContent=chk;
+  let tot=parseInt(document.getElementById('s-total').textContent)||0;
+  const pct=tot>0?Math.round(chk/tot*100):0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+}
+
+function buildSchedule(){
+  const sc=document.getElementById('schedule-content');
+  sc.innerHTML='';
+  const groups={daily:[],weekly:[],monthly:[],quarterly:[],biannual:[],annual:[],event:[]};
+  DATA.categories.forEach(cat=>{
+    cat.sections.forEach(sec=>{
+      sec.items.forEach(item=>{
+        if(groups[item.frequency]) groups[item.frequency].push({text:item.text,cat:cat.name,risk:cat.risk});
+      });
+    });
+  });
+  const order=['daily','weekly','monthly','quarterly','biannual','annual','event'];
+  const icons={daily:'🔴',weekly:'🟠',monthly:'🔵',quarterly:'🟣',biannual:'🟢',annual:'⚫',event:'⚡'};
+  order.forEach(f=>{
+    if(!groups[f].length) return;
+    const sec=document.createElement('div');
+    sec.className='sched-section';
+    const head=document.createElement('div');
+    head.className='sched-head';
+    head.innerHTML=`<span>${icons[f]} ${FL[f]} 점검</span><span class="sched-cnt">${groups[f].length}건</span><span class="chev">▾</span>`;
+    const body=document.createElement('div');
+    body.style.display='none';
+    groups[f].forEach(({text,cat,risk})=>{
+      const item=document.createElement('div');
+      item.className='sched-item';
+      item.innerHTML=`${text}<div class="sched-cat">${cat} · ${risk}</div>`;
+      body.appendChild(item);
+    });
+    head.onclick=()=>{
+      const open=body.style.display==='block';
+      body.style.display=open?'none':'block';
+      head.querySelector('.chev').classList.toggle('open',!open);
+    };
+    sec.appendChild(head);
+    sec.appendChild(body);
+    sc.appendChild(sec);
+  });
+}
+
+function buildAbout(){
+  const el=document.getElementById('state-info-list');
+  el.innerHTML='';
+  Object.entries(STATE_INFO).forEach(([code,info])=>{
+    const row=document.createElement('div');
+    row.className='state-info-row';
+    row.innerHTML=`<span class="state-code">${code}</span><b>${info.name}</b><div class="state-osha">${info.plan} — ${info.notes}</div>`;
+    el.appendChild(row);
+  });
+}
+
+function toggleVoice(){
+  voiceOpen=!voiceOpen;
+  document.getElementById('voice-panel').style.display=voiceOpen?'block':'none';
+  if(!voiceOpen){stopVoice();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){document.getElementById('voice-status').textContent='이 브라우저는 음성 인식을 지원하지 않습니다. 아래 빠른 검색을 이용하세요.';return;}
+  if(isListening){stopVoice();return;}
+  recog=new SR();
+  recog.lang='ko-KR';recog.interimResults=true;recog.continuous=false;
+  recog.onstart=()=>{isListening=true;document.getElementById('mic-btn').classList.add('listening');document.getElementById('voice-status').textContent='듣고 있습니다... 말씀하세요 🎙';};
+  recog.onresult=e=>{
+    const t=Array.from(e.results).map(r=>r[0].transcript).join('');
+    document.getElementById('voice-result').textContent=t;
+    if(e.results[e.results.length-1].isFinal){doVoiceSearch(t);}
+  };
+  recog.onerror=()=>{document.getElementById('voice-status').textContent='음성 인식 실패. 아래 빠른 검색을 이용하세요.';stopVoice();};
+  recog.onend=stopVoice;
+  recog.start();
+}
+function stopVoice(){isListening=false;if(recog)try{recog.stop();}catch(e){}document.getElementById('mic-btn').classList.remove('listening');document.getElementById('voice-status').textContent='마이크를 누르고 말씀하세요';}
+function doVoiceSearch(q){
+  document.getElementById('search-input').value=q;
+  document.getElementById('voice-panel').style.display='none';
+  voiceOpen=false;
+  stopVoice();
+  curQ=q;renderChecklist();
+  document.querySelectorAll('.sec-group').forEach(s=>s.style.display='block');
+  document.querySelectorAll('.items-body').forEach(b=>b.style.display='block');
+  document.querySelectorAll('.chev').forEach(c=>c.classList.add('open'));
+}
+
+function updSl(id,valId,type,unit=''){
+  const v=parseFloat(document.getElementById(id).value);
+  let label='';
+  if(type==='rate') label='$'+v+'/sqft';
+  else if(type==='pct') label=v+'%';
+  else if(type==='cnt') label=v.toLocaleString()+unit;
+  else if(type==='lf') label=v.toLocaleString()+' LF';
+  else if(type==='asb') label=v===0?'미해당':'$'+v+'/sqft';
+  else if(type==='fixed') label=v===0?'미해당':'$'+v.toLocaleString();
+  document.getElementById(valId).textContent=label;
+}
+
+function calcCost(){
+  const area=parseFloat(document.getElementById('c-area').value)||0;
+  const st=document.getElementById('c-state').value;
+  const yr=document.getElementById('c-year').value;
+  const lp=document.getElementById('c-lease').value;
+  const lm=lp==='short'?.7:lp==='mid'?1:1.3;
+  const demo=parseFloat(document.getElementById('sr-demo').value)||0;
+  const epoxy=(parseFloat(document.getElementById('sr-epoxy').value)||0)/100;
+  const anchor=parseFloat(document.getElementById('sr-anchor').value)||0;
+  const wiring=parseFloat(document.getElementById('sr-wiring').value)||0;
+  const asb=parseFloat(document.getElementById('sr-asb').value)||0;
+  const waste=parseFloat(document.getElementById('sr-waste').value)||0;
+  const ref=parseFloat(document.getElementById('sr-ref').value)||0;
+  const soil=st==='CA'?(parseFloat(document.getElementById('sr-soil').value)||0):0;
+  const esa=parseFloat(document.getElementById('sr-esa').value)||0;
+  const elec=parseFloat(document.getElementById('sr-elec').value)||0;
+
+  document.getElementById('ca-soil-row').style.display=st==='CA'?'flex':'none';
+
+  const demoAmt=area*demo*lm;
+  const epoxyAmt=area*epoxy*8;
+  const anchorAmt=anchor*22;
+  const wiringAmt=wiring*10;
+  const miscAmt=epoxyAmt+anchorAmt+wiringAmt;
+  const asbAmt=area*asb;
+  const wasteAmt=waste*500;
+  const refAmt=ref*850;
+  const soilAmt=area*soil;
+  const hazAmt=asbAmt+wasteAmt+refAmt+soilAmt;
+  const profAmt=esa+elec;
+  const buildAdj=yr==='old'?area*3:yr==='mid'?area*.5:0;
+  const total=demoAmt+miscAmt+hazAmt+profAmt+buildAdj;
+  const perSq=area>0?total/area:0;
+
+  const fmt=n=>'$'+Math.round(n).toLocaleString();
+  const fmtR=n=>'$'+n.toFixed(2);
+  document.getElementById('cost-total').textContent=fmt(total);
+  document.getElementById('cost-persqft').textContent=fmtR(perSq)+'/sqft';
+  document.getElementById('cost-demo').textContent=fmt(demoAmt+miscAmt);
+  document.getElementById('cost-haz').textContent=fmt(hazAmt);
+  document.getElementById('cost-prof').textContent=fmt(profAmt);
+  document.getElementById('cost-build').textContent=fmt(buildAdj);
+
+  const rows=[];
+  if(demoAmt) rows.push({l:'일반 내부 철거',s:'Hometown Demolition 2024',a:demoAmt});
+  if(epoxyAmt) rows.push({l:'바닥 에폭시 제거',s:'견적 필요',a:epoxyAmt});
+  if(anchorAmt) rows.push({l:'랙 앵커 구멍 복구',s:'견적 필요',a:anchorAmt});
+  if(wiringAmt) rows.push({l:'임시 배선 철거',s:'견적 필요',a:wiringAmt});
+  if(asbAmt) rows.push({l:'석면 제거',s:'Angi/HomeAdvisor 2025~26',a:asbAmt});
+  if(wasteAmt) rows.push({l:'위험 폐기물 처리',s:'견적 필요',a:wasteAmt});
+  if(refAmt) rows.push({l:'냉매 회수',s:'견적 필요',a:refAmt});
+  if(soilAmt) rows.push({l:'토양 오염 정화 (★CA)',s:'Substrata LA 2025',a:soilAmt,ca:true});
+  if(buildAdj) rows.push({l:`건축연도 추가 (${yr==='old'?'1980년 이전':'1980~1999년'})`,s:'견적 필요',a:buildAdj});
+  if(esa) rows.push({l:'Phase I ESA',s:'Geo Forward 2024',a:esa});
+  if(elec) rows.push({l:'열화상·전기 점검',s:'견적 필요',a:elec});
+
+  const card=document.getElementById('breakdown-card');
+  card.style.display=rows.length?'block':'none';
+  const bd=document.getElementById('breakdown-body');
+  bd.innerHTML='';
+  rows.forEach(r=>{
+    const d=document.createElement('div');
+    d.className='breakdown-item';
+    d.innerHTML=`<div><div class="bd-label${r.ca?' ca-badge':''}">${r.l}</div><div class="bd-src">${r.s}</div></div><div class="bd-amt">${fmt(r.a)}</div>`;
+    bd.appendChild(d);
+  });
+  if(rows.length){
+    const tot=document.createElement('div');
+    tot.className='breakdown-item';
+    tot.innerHTML=`<div class="bd-label bd-total">합계</div><div class="bd-amt bd-total">${fmt(total)}</div>`;
+    bd.appendChild(tot);
+  }
+  document.getElementById('conesco-range').textContent=`${fmt(area*3.5)} ~ ${fmt(area*6)} (Conesco 2025)`;
+}
+
+function resetCost(){
+  ['sr-demo','sr-asb','sr-soil'].forEach(id=>{
+    document.getElementById(id).value=id==='sr-demo'?4:0;
+  });
+  ['sr-epoxy','sr-anchor','sr-wiring','sr-waste','sr-ref','sr-esa','sr-elec'].forEach(id=>{
+    document.getElementById(id).value=0;
+  });
+  document.getElementById('c-area').value=50000;
+  document.getElementById('c-state').value='TX';
+  document.getElementById('c-year').value='new';
+  document.getElementById('c-lease').value='mid';
+  ['sv-demo','sv-epoxy','sv-anchor','sv-wiring','sv-asb','sv-waste','sv-ref','sv-soil','sv-esa','sv-elec'].forEach(id=>{
+    const defaults={'sv-demo':'$4/sqft','sv-epoxy':'0%','sv-anchor':'0개','sv-wiring':'0 LF','sv-asb':'미해당','sv-waste':'0드럼','sv-ref':'0유닛','sv-soil':'미해당','sv-esa':'미해당','sv-elec':'미해당'};
+    document.getElementById(id).textContent=defaults[id]||'0';
+  });
+  document.getElementById('ca-soil-row').style.display='none';
+  calcCost();
+}
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  });
+}
+
+renderChecklist();
+calcCost();
+buildAbout();
+</script>
+</body>
+</html>
